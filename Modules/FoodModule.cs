@@ -1,5 +1,4 @@
 using Carter;
-using Microsoft.AspNetCore.Mvc;
 
 public class FoodModule : CarterModule
 {

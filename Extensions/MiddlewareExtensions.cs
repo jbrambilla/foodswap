@@ -8,6 +8,9 @@ public static class MiddlewareExtensions
             app.UseSwaggerUI();
         }
 
+        app.UseGlobalErrorHandler();
+        app.UseEnrichLogRequest();
+
         return app;
     }
 }

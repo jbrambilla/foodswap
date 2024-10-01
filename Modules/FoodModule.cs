@@ -1,4 +1,5 @@
 using Carter;
+using Serilog;
 
 public class FoodModule : CarterModule
 {
@@ -21,8 +22,8 @@ public class FoodModule : CarterModule
                 Fat = 0.3m});
         });
 
-        app.MapPost("/", (FoodRequest request) =>{
-
+        app.MapPost("/", (FoodRequest request) =>
+        {
             return Results.Ok(new FoodResponse(){
                 Id = Guid.NewGuid(),
                 Name = request.Name,

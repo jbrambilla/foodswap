@@ -3,10 +3,10 @@ using Carter;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddAppServices();
+builder.SetupSerilogMSSQl();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

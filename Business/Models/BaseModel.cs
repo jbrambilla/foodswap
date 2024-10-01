@@ -1,3 +1,4 @@
+namespace foodswap.Business.Models;
 public abstract class BaseModel
 {
     public BaseModel()

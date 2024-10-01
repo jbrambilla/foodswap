@@ -1,19 +1,19 @@
 using Carter;
+using Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddAppServices();
-builder.SetupSerilogMSSQl();
+builder
+    .AddArchtectures()
+    .AddServices()
+    .AddLog();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseAppMiddleware(app.Environment);
-app.MapCarter();
+app
+    .UseArchtectures()
+    .UseGlobalErrorHandler()
+    .UseLogRequestHandler()
+    .MapCarter();
 
 app.Run();

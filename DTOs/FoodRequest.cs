@@ -1,3 +1,4 @@
+namespace foodswap.DTOs;
 public class FoodRequest
 {
     public string Name { get; set; } = string.Empty;

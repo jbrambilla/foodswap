@@ -1,6 +1,18 @@
 @foodswap_HostAddress = http://localhost:5256
 
+###
 GET {{foodswap_HostAddress}}/food
 Accept: application/json
 
 ###
+POST {{foodswap_HostAddress}}/food
+Accept: application/json
+Content-Type: application/json
+
+{
+  "name": "Apple",
+  "calories": 10,
+  "carbohydrates": 20,
+  "protein": 30,
+  "fat": 40
+}

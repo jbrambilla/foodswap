@@ -1,3 +1,4 @@
+namespace foodswap.Business.Models;
 public class Food : BaseModel
 {
     public Food(string name, decimal calories, decimal carbohydrates, decimal protein, decimal fat)

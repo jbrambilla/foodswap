@@ -1,5 +1,7 @@
 using FluentValidation;
+using foodswap.DTOs;
 
+namespace foodswap.Validators;
 public class FoodRequestValidator : AbstractValidator<FoodRequest>
 {
     public FoodRequestValidator()

@@ -1,10 +1,31 @@
+using Carter;
+using FluentValidation;
+using foodswap.DTOs;
+using foodswap.Validators;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
 
-public static class SetupLogExtension
-{
-    public static void SetupSerilogMSSQl(this WebApplicationBuilder builder)
+namespace Extensions;
+public static class BuilderExtensions{
+    public static WebApplicationBuilder AddArchtectures(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+
+        builder.Services.AddCarter();
+
+        return builder;
+    }
+
+    public static WebApplicationBuilder AddServices(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddScoped<IValidator<FoodRequest>, FoodRequestValidator>();
+
+        return builder;
+    }
+
+    public static WebApplicationBuilder AddLog(this WebApplicationBuilder builder)
     {
         builder.Host.UseSerilog((ctx, lc) => lc
             .Enrich.WithProperty("ApplicationName", "FoodSwap")
@@ -21,5 +42,7 @@ public static class SetupLogExtension
                 restrictedToMinimumLevel: LogEventLevel.Warning
             )
         );
+
+        return builder;
     }
 }

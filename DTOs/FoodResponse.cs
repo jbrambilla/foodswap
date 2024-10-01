@@ -1,3 +1,4 @@
+namespace foodswap.DTOs;
 public class FoodResponse
 {
     public Guid Id { get; set; }

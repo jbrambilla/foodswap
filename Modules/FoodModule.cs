@@ -1,6 +1,8 @@
 using Carter;
-using Serilog;
+using foodswap.DTOs;
+using foodswap.Filters;
 
+namespace foodswap.Modules;
 public class FoodModule : CarterModule
 {
     public FoodModule()

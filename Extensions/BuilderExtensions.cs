@@ -2,6 +2,7 @@ using Carter;
 using FluentValidation;
 using foodswap.DTOs;
 using foodswap.Validators;
+using Microsoft.AspNetCore.HttpLogging;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
@@ -25,6 +26,21 @@ public static class BuilderExtensions{
         return builder;
     }
 
+    public static WebApplicationBuilder AddHttpLogging(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddHttpLogging(logging =>
+        {
+            logging.LoggingFields = HttpLoggingFields.All;
+            logging.RequestHeaders.Add("Authorization");
+            logging.MediaTypeOptions.AddText("application/json");
+            logging.RequestBodyLogLimit = 4096;
+            logging.ResponseBodyLogLimit = 4096;
+            logging.CombineLogs = true;
+        });
+
+        return builder;
+    }
+
     public static WebApplicationBuilder AddLog(this WebApplicationBuilder builder)
     {
         builder.Host.UseSerilog((ctx, lc) => lc
@@ -39,7 +55,7 @@ public static class BuilderExtensions{
                     TableName = "Logs",
                     AutoCreateSqlTable = true
                 },
-                restrictedToMinimumLevel: LogEventLevel.Warning
+                restrictedToMinimumLevel: LogEventLevel.Information
             )
         );
 

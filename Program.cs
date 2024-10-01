@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder
     .AddArchtectures()
     .AddServices()
+    .AddHttpLogging()
     .AddLog();
 
 var app = builder.Build();
@@ -13,7 +14,6 @@ var app = builder.Build();
 app
     .UseArchtectures()
     .UseGlobalErrorHandler()
-    .UseLogRequestHandler()
     .MapCarter();
 
 app.Run();

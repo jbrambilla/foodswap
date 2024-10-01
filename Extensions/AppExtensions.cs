@@ -12,6 +12,8 @@ public static class AppExtensions
             app.UseSwaggerUI();
         }
 
+        app.UseHttpLogging();
+
         return app;
     }
 
@@ -31,25 +33,6 @@ public static class AppExtensions
                 context.Response.StatusCode = 500;
                 await context.Response.WriteAsJsonAsync("An unexpected error has occurred in the server."); //não expor ex pro usuario
             }
-        });
-
-        return app;
-    }
-
-    public static WebApplication UseLogRequestHandler(this WebApplication app)
-    {
-        app.Use(async (context, next) =>
-        {
-            Log.ForContext("HttpMethod", context.Request.Method) 
-            .ForContext("Path", context.Request.Path) 
-            .Information($"REQUEST {context.Request.Method} {context.Request.Path} START");
-
-            await next();
-
-            Log.ForContext("HttpMethod", context.Request.Method)
-            .ForContext("Path", context.Request.Path)
-            .ForContext("StatusCode", context.Response.StatusCode)
-            .Information($"REQUEST {context.Request.Method} {context.Request.Path} FINISHED WITH Status: {context.Response.StatusCode}");
         });
 
         return app;

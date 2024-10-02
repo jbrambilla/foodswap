@@ -2,10 +2,10 @@ using Carter;
 using foodswap.DTOs;
 using foodswap.Filters;
 
-namespace foodswap.Modules;
-public class FoodModule : CarterModule
+namespace foodswap.Endpoints;
+public class FoodEndpoints : CarterModule
 {
-    public FoodModule()
+    public FoodEndpoints()
         :base("/food")
     {
         WithTags("Food");
@@ -17,6 +17,17 @@ public class FoodModule : CarterModule
         {
             return Results.Ok(new FoodResponse(){
                 Id = Guid.NewGuid(),
+                Name = "apple",
+                Calories = 52,
+                Carbohydrates = 0.1m,
+                Protein = 0.2m,
+                Fat = 0.3m});
+        });
+
+        app.MapGet("/{id}", (Guid id) =>
+        {
+            return Results.Ok(new FoodResponse(){
+                Id = id,
                 Name = "apple",
                 Calories = 52,
                 Carbohydrates = 0.1m,

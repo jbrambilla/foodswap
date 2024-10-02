@@ -5,6 +5,10 @@ GET {{foodswap_HostAddress}}/food
 Accept: application/json
 
 ###
+GET {{foodswap_HostAddress}}/food/7f6d3aba-4391-4138-bca2-5175c1137475
+Accept: application/json
+
+###
 POST {{foodswap_HostAddress}}/food
 Accept: application/json
 Content-Type: application/json

@@ -1,9 +1,10 @@
 namespace foodswap.Business.Models;
 public class Food : BaseModel
 {
-    public Food(string name, decimal calories, decimal carbohydrates, decimal protein, decimal fat, string type)
+    public Food(string name, int portion, decimal calories, decimal carbohydrates, decimal protein, decimal fat, string type)
     {
         Name = name;
+        Portion = portion;
         Type = type;
         Calories = calories;
         Carbohydrates = carbohydrates;
@@ -12,6 +13,7 @@ public class Food : BaseModel
         Active = true;
     }
     public string Name { get; private set; } = string.Empty;
+    public int Portion { get; private set; }
     public string Type { get; private set; }
     public decimal Calories { get; private set; }
     public decimal Carbohydrates { get; private set; }
@@ -19,9 +21,10 @@ public class Food : BaseModel
     public decimal Fat { get; private set; }
     public bool Active { get; private set; }
 
-    public void Update(string name, string type, decimal calories, decimal carbohydrates, decimal protein, decimal fat)
+    public void Update(string name, int portion, string type, decimal calories, decimal carbohydrates, decimal protein, decimal fat)
     {
         Name = name;
+        Portion = portion;
         Type = type;
         Calories = calories;
         Carbohydrates = carbohydrates;

@@ -15,11 +15,12 @@ Content-Type: application/json
 
 {
   "name": "asda",
+  "portion": 100,
   "calories": 10,
   "carbohydrates": 20,
   "protein": 30,
   "fat": 40,
-  "type": 5
+  "type": "MEAT"
 }
 
 ###

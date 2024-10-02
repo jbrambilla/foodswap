@@ -18,10 +18,12 @@ public class FoodEndpoints : CarterModule
             return Results.Ok(new FoodResponse(){
                 Id = Guid.NewGuid(),
                 Name = "apple",
+                Portion = 100,
                 Calories = 52,
                 Carbohydrates = 0.1m,
                 Protein = 0.2m,
-                Fat = 0.3m});
+                Fat = 0.3m,
+                Type = "VEGETABLE"});
         });
 
         app.MapGet("/{id}", (Guid id) =>
@@ -29,10 +31,12 @@ public class FoodEndpoints : CarterModule
             return Results.Ok(new FoodResponse(){
                 Id = id,
                 Name = "apple",
+                Portion = 100,
                 Calories = 52,
                 Carbohydrates = 0.1m,
                 Protein = 0.2m,
-                Fat = 0.3m});
+                Fat = 0.3m,
+                Type = "MEAT"});
         });
 
         app.MapPost("/", (CreateFoodRequest request) =>
@@ -40,10 +44,12 @@ public class FoodEndpoints : CarterModule
             return Results.Ok(new FoodResponse(){
                 Id = Guid.NewGuid(),
                 Name = request.Name,
+                Portion = request.Portion,
                 Calories = request.Calories,
                 Carbohydrates = request.Carbohydrates,
                 Protein = request.Protein,
-                Fat = request.Fat
+                Fat = request.Fat,
+                Type = request.Type
             });
         })
         .AddEndpointFilter<ValidatorFilter<CreateFoodRequest>>();

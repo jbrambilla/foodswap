@@ -1,22 +1,37 @@
 @foodswap_HostAddress = http://localhost:5256
 
 ###
-GET {{foodswap_HostAddress}}/food
+GET {{foodswap_HostAddress}}/foods
 Accept: application/json
 
 ###
-GET {{foodswap_HostAddress}}/food/7f6d3aba-4391-4138-bca2-5175c1137475
+GET {{foodswap_HostAddress}}/foods/7f6d3aba-4391-4138-bca2-5175c1137475
 Accept: application/json
 
 ###
-POST {{foodswap_HostAddress}}/food
+POST {{foodswap_HostAddress}}/foods
 Accept: application/json
 Content-Type: application/json
 
 {
-  "name": "Apple",
+  "name": "asda",
   "calories": 10,
   "carbohydrates": 20,
   "protein": 30,
-  "fat": 40
+  "fat": 40,
+  "type": 5
+}
+
+###
+POST {{foodswap_HostAddress}}/users
+Accept: application/json
+Content-Type: application/json
+
+{
+  "name": "John",
+  "surname": "Doe",
+  "email": "john.doe@example",
+  "password": "StrongPassword123!",
+  "phoneNumber": "11987654321",
+  "birthDate": "1990-05-15T00:00:00"
 }

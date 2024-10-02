@@ -1,8 +1,13 @@
+using System.Text.Json.Serialization;
 using Carter;
 using FluentValidation;
-using foodswap.DTOs;
+using foodswap.DTOs.FoodDTOs;
+using foodswap.DTOs.UserDTOs;
+using foodswap.Identity;
 using foodswap.Validators;
 using Microsoft.AspNetCore.HttpLogging;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
@@ -21,7 +26,8 @@ public static class BuilderExtensions{
 
     public static WebApplicationBuilder AddServices(this WebApplicationBuilder builder)
     {
-        builder.Services.AddScoped<IValidator<FoodRequest>, FoodRequestValidator>();
+        builder.Services.AddScoped<IValidator<CreateFoodRequest>, CreateFoodRequestValidator>();
+        builder.Services.AddScoped<IValidator<CreateUserRequest>, CreateUserRequestValidator>();
 
         return builder;
     }
@@ -49,7 +55,7 @@ public static class BuilderExtensions{
             .Enrich.FromLogContext()
             .WriteTo.Console()
             .WriteTo.MSSqlServer(
-                builder.Configuration.GetConnectionString("DefaultConnection"),
+                builder.Configuration.GetConnectionString("AuditConnection"),
                 sinkOptions: new MSSqlServerSinkOptions
                 {
                     TableName = "Logs",
@@ -58,6 +64,20 @@ public static class BuilderExtensions{
                 restrictedToMinimumLevel: LogEventLevel.Information
             )
         );
+
+        return builder;
+    }
+
+    public static WebApplicationBuilder AddIdentity(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddIdentityCore<User>()
+            .AddEntityFrameworkStores<AuthDbContext>()
+            .AddDefaultTokenProviders();
+
+        builder.Services.AddDbContext<AuthDbContext>(options => 
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+        builder.Services.AddDataProtection();
 
         return builder;
     }

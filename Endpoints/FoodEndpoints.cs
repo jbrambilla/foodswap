@@ -1,14 +1,14 @@
 using Carter;
-using foodswap.DTOs;
+using foodswap.DTOs.FoodDTOs;
 using foodswap.Filters;
 
 namespace foodswap.Endpoints;
 public class FoodEndpoints : CarterModule
 {
     public FoodEndpoints()
-        :base("/food")
+        :base("/foods")
     {
-        WithTags("Food");
+        WithTags("Foods");
     }
     
     public override void AddRoutes(IEndpointRouteBuilder app)
@@ -35,7 +35,7 @@ public class FoodEndpoints : CarterModule
                 Fat = 0.3m});
         });
 
-        app.MapPost("/", (FoodRequest request) =>
+        app.MapPost("/", (CreateFoodRequest request) =>
         {
             return Results.Ok(new FoodResponse(){
                 Id = Guid.NewGuid(),
@@ -46,6 +46,6 @@ public class FoodEndpoints : CarterModule
                 Fat = request.Fat
             });
         })
-        .AddEndpointFilter<ValidatorFilter<FoodRequest>>();
+        .AddEndpointFilter<ValidatorFilter<CreateFoodRequest>>();
     }
 }

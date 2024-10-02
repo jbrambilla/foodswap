@@ -1,6 +1,7 @@
-namespace foodswap.DTOs;
-public class FoodRequest
+namespace foodswap.DTOs.FoodDTOs;
+public class FoodResponse
 {
+    public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public decimal Calories { get; set; }
     public decimal Carbohydrates { get; set; }

@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json.Serialization;
 using Carter;
 using FluentValidation;
@@ -5,9 +6,12 @@ using foodswap.DTOs.FoodDTOs;
 using foodswap.DTOs.UserDTOs;
 using foodswap.Identity;
 using foodswap.Validators;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
@@ -17,9 +21,47 @@ public static class BuilderExtensions{
     public static WebApplicationBuilder AddArchtectures(this WebApplicationBuilder builder)
     {
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
 
         builder.Services.AddCarter();
+
+        return builder;
+    }
+
+    public static WebApplicationBuilder AddSwaggerWithAuth(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddSwaggerGen(o =>
+        {
+            o.CustomSchemaIds(id => id.FullName!.Replace('+', '-'));
+
+            var securityScheme = new OpenApiSecurityScheme
+            {
+                Name = "JWT Authentication",
+                Description = "Enter your JWT token in this field",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+                Scheme = JwtBearerDefaults.AuthenticationScheme,
+                BearerFormat = "JWT",
+            };
+
+            o.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, securityScheme);
+
+            var securityRequirement = new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = JwtBearerDefaults.AuthenticationScheme
+                        }
+                    },
+                    []
+                }
+            };
+
+            o.AddSecurityRequirement(securityRequirement);
+        });
 
         return builder;
     }
@@ -28,6 +70,9 @@ public static class BuilderExtensions{
     {
         builder.Services.AddScoped<IValidator<CreateFoodRequest>, CreateFoodRequestValidator>();
         builder.Services.AddScoped<IValidator<CreateUserRequest>, CreateUserRequestValidator>();
+        builder.Services.AddScoped<IValidator<GetTokenRequest>, GetTokenRequestValidator>();
+
+        builder.Services.AddSingleton<TokenProvider>();
 
         return builder;
     }
@@ -76,6 +121,20 @@ public static class BuilderExtensions{
 
         builder.Services.AddDbContext<AuthDbContext>(options => 
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+        builder.Services.AddAuthorization();
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!)),
+                    ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                    ValidAudience = builder.Configuration["Jwt:Audience"],
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
 
         builder.Services.AddDataProtection();
 

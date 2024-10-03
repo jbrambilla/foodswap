@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder
     .AddArchtectures()
+    .AddSwaggerWithAuth()
     .AddServices()
     .AddHttpLogging()
     .AddLog()

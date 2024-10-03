@@ -15,6 +15,9 @@ public static class AppExtensions
 
         app.UseHttpLogging();
 
+        app.UseAuthentication();
+        app.UseAuthorization();
+
         return app;
     }
 

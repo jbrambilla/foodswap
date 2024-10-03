@@ -24,7 +24,8 @@ public class FoodEndpoints : CarterModule
                 Protein = 0.2m,
                 Fat = 0.3m,
                 Type = "VEGETABLE"});
-        });
+        })
+        .RequireAuthorization();
 
         app.MapGet("/{id}", (Guid id) =>
         {

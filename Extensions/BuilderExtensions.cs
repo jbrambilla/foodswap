@@ -5,6 +5,7 @@ using foodswap.DTOs.FoodDTOs;
 using foodswap.DTOs.TokenDTOs;
 using foodswap.DTOs.UserDTOs;
 using foodswap.Identity;
+using foodswap.Options;
 using foodswap.Validators;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
@@ -25,6 +26,30 @@ public static class BuilderExtensions{
         builder.Services.AddSingleton<TokenProvider>();
 
         builder.Services.AddCarter();
+
+        return builder;
+    }
+
+    public static WebApplicationBuilder AddOptions(this WebApplicationBuilder builder)
+    {
+        builder.Services
+            .AddOptions<ConnectionStringsOptions>()
+            .Bind(builder.Configuration.GetSection(ConnectionStringsOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        builder.Services
+            .AddOptions<IdentitySeedOptions>()
+            .Bind(builder.Configuration.GetSection(IdentitySeedOptions.SectionName))
+            .ValidateDataAnnotations()
+            .Validate(i => i.AdminUser != null && i.AdminUser.Email != null && i.AdminUser.Password != null, "AdminUser must have an email and password")
+            .ValidateOnStart();
+
+        builder.Services
+            .AddOptions<JwtOptions>()
+            .Bind(builder.Configuration.GetSection(JwtOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
         return builder;
     }
@@ -115,13 +140,23 @@ public static class BuilderExtensions{
 
     public static WebApplicationBuilder AddIdentity(this WebApplicationBuilder builder)
     {
+        var connectionStringsOptions = builder.Configuration
+            .GetSection(ConnectionStringsOptions.SectionName)
+            .Get<ConnectionStringsOptions>();
+
+        if (connectionStringsOptions == null)
+        {
+            Log.Error("No ConnectionStrings configuration provided for Identity initialization");
+            throw new Exception("No ConnectionStrings configuration provided for Identity initialization");
+        }
+
         builder.Services.AddIdentityCore<User>()
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<AuthDbContext>()
             .AddDefaultTokenProviders();
 
         builder.Services.AddDbContext<AuthDbContext>(options => 
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(connectionStringsOptions.DefaultConnection));
 
         builder.Services.AddAuthorization();
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

@@ -1,27 +1,35 @@
 using Carter;
 using Extensions;
-using foodswap.Identity;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using Serilog;
 
-var builder = WebApplication.CreateBuilder(args);
 
-builder
-    .AddArchtectures()
-    .AddSwaggerWithAuth()
-    .AddServices()
-    .AddHttpLogging()
-    .AddLog()
-    .AddIdentity();
-    
-var app = builder.Build();
+try {
+    var builder = WebApplication.CreateBuilder(args);
 
-app
-    .UseArchtectures()
-    .UseGlobalErrorHandler()
-    .UseCustomUnauthorizedMiddleware()
-    .MapCarter();
+    builder
+        .AddArchtectures()
+        .AddLog()
+        .AddOptions()
+        .AddSwaggerWithAuth()
+        .AddServices()
+        .AddHttpLogging()
+        .AddIdentity();
+        
+    var app = builder.Build();
 
-await app.UseIdentitySeed();
+    app
+        .UseArchtectures()
+        .UseGlobalErrorHandler()
+        .UseCustomUnauthorizedMiddleware()
+        .MapCarter();
 
-app.Run();
+    await app.UseIdentitySeed();
+
+    app.Run();
+}
+catch (Exception ex) {
+    Log.Fatal(ex, "Application failed to start");
+}
+finally {
+    Log.CloseAndFlush();
+}

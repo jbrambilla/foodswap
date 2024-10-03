@@ -1,4 +1,5 @@
 using foodswap.Identity;
+using foodswap.Options;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 
@@ -9,69 +10,55 @@ public static class IdentitySeedData
 
     public static async Task SeedRoles(RoleManager<IdentityRole> roleManager, IConfiguration configuration)
     {
-        var seeded = configuration.GetValue<bool>("Identity:Seeded:Roles");
-        if (seeded){
-            Log.Information("Roles already seeded.");
-            return;
-        }
+        var identitySeedOptions = configuration
+            .GetSection(IdentitySeedOptions.SectionName)
+            .Get<IdentitySeedOptions>();
 
-        var roles = configuration.GetSection("Identity:Roles").Get<List<string>>();
-        if (roles is null || roles.Count == 0)
+        if (identitySeedOptions == null)
         {
-            Log.Error("No roles defined in the configuration file.");
+            Log.Error("No IdentitySeed configuration provided");
             return;
         }
 
-        foreach (var role in roles)
+        foreach (var role in identitySeedOptions.Roles)
         {
             if (!await roleManager.RoleExistsAsync(role))
             {
                 await roleManager.CreateAsync(new IdentityRole(role));
             }
         }
-
-        configuration["Identity:Seeded:Roles"] = "true";
     }
     public static async Task SeedAdminUser(UserManager<User> userManager, IConfiguration configuration)
     {
-        var seeded = configuration.GetValue<bool>("Identity:Seeded:AdminUser");
-        if (seeded){
-            Log.Information("Admin user already seeded.");
+        var identitySeedOptions = configuration
+            .GetSection(IdentitySeedOptions.SectionName)
+            .Get<IdentitySeedOptions>();
+
+        if (identitySeedOptions == null)
+        {
+            Log.Error("No IdentitySeed configuration provided");
             return;
         }
 
-        var adminUserName = configuration["Identity:AdminUser:Name"];
-        var adminUserSurname = configuration["Identity:AdminUser:Surname"];
-        var adminUserPhoneNumber = configuration["Identity:AdminUser:PhoneNumber"];
-        var adminUserBirthDate = configuration.GetValue<DateTime>("Identity:AdminUser:BirthDate");
-        var adminUserEmail = configuration["Identity:AdminUser:Email"];
-        var adminUserPassword = configuration["Identity:AdminUser:Password"];
-        
-        if (string.IsNullOrEmpty(adminUserEmail)     
-            || string.IsNullOrEmpty(adminUserPassword) 
-            || string.IsNullOrEmpty(adminUserName) 
-            || string.IsNullOrEmpty(adminUserSurname)
-            || string.IsNullOrEmpty(adminUserPhoneNumber)
-            || adminUserBirthDate == default) {
-                Log.Error("Invalid configuration for admin user. Please check the configuration file.");
-                return;
-            }
-
-        var adminUser = await userManager.FindByEmailAsync(adminUserEmail);
+        var adminUser = await userManager.FindByEmailAsync(identitySeedOptions.AdminUser.Email);
         if (adminUser == null)
         {
-            var user = new User(adminUserName, adminUserSurname, adminUserEmail, adminUserPhoneNumber, adminUserBirthDate) 
+            var user = new User(
+                identitySeedOptions.AdminUser.Name, 
+                identitySeedOptions.AdminUser.Surname,
+                identitySeedOptions.AdminUser.Email,
+                identitySeedOptions.AdminUser.PhoneNumber,
+                identitySeedOptions.AdminUser.BirthDate)
             { 
                 PhoneNumberConfirmed = true, 
                 EmailConfirmed = true 
             };
             
-            var result = await userManager.CreateAsync(user, adminUserPassword);
+            var result = await userManager.CreateAsync(user, identitySeedOptions.AdminUser.Password);
 
             if (result.Succeeded)
             {
-                await userManager.AddToRoleAsync(user, "Admin");
-                configuration["Identity:Seeded:AdminUser"] = "true";
+                await userManager.AddToRoleAsync(user, identitySeedOptions.AdminUser.Role);
             }
         }
     }

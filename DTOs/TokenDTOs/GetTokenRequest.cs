@@ -1,4 +1,4 @@
-namespace foodswap.DTOs.UserDTOs;
+namespace foodswap.DTOs.TokenDTOs;
 public class GetTokenRequest
 {
     public string Email { get; set; } = string.Empty;

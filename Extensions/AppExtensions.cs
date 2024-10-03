@@ -1,4 +1,5 @@
 using System.Text.Json;
+using foodswap;
 using foodswap.Endpoints;
 using foodswap.Identity;
 using Microsoft.AspNetCore.Identity;
@@ -17,9 +18,6 @@ public static class AppExtensions
         }
 
         app.UseHttpLogging();
-
-        app.UseAuthentication();
-        app.UseAuthorization();
 
         return app;
     }
@@ -49,12 +47,47 @@ public static class AppExtensions
                     errorMessage = "Invalid input format. Please check the data types of your request.";
                 }             
 
-                await context.Response.WriteAsJsonAsync(errorMessage); //não expor exception pro usuario
+                await context.Response.WriteAsJsonAsync(new ApiResponse<object>(false, errorMessage, null!, [])); //não expor exception pro usuario
             }
         });
 
         return app;
     }
+    
+    public static WebApplication UseCustomUnauthorizedMiddleware(this WebApplication app)
+    {
+        app.UseStatusCodePages(async context => 
+        {
+            var response = context.HttpContext.Response;
+
+            if (response.StatusCode == StatusCodes.Status401Unauthorized)
+            {
+                response.ContentType = "application/json";
+
+                await response.WriteAsJsonAsync(
+                    new ApiResponse<object>(
+                        false,
+                        "User authentication failed.",
+                        null!,
+                        new List<string> { "Invalid Token" }));
+            } else if (response.StatusCode == StatusCodes.Status403Forbidden)
+            {
+                response.ContentType = "application/json";
+
+                await response.WriteAsJsonAsync(
+                    new ApiResponse<object>(
+                    false,
+                    "Access Denied",
+                    null!,
+                    new List<string> { "User doesn't have the necessary permissions" }));
+            }
+        });
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+        return app;
+    }
+    
     public static async Task UseIdentitySeed(this WebApplication app)
     {
         using (var scope = app.Services.CreateScope())

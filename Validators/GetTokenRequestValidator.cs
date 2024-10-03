@@ -1,5 +1,5 @@
 using FluentValidation;
-using foodswap.DTOs.UserDTOs;
+using foodswap.DTOs.TokenDTOs;
 namespace foodswap.Validators;
 public class GetTokenRequestValidator : AbstractValidator<GetTokenRequest>
 {

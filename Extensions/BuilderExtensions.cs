@@ -1,8 +1,8 @@
 using System.Text;
-using System.Text.Json.Serialization;
 using Carter;
 using FluentValidation;
 using foodswap.DTOs.FoodDTOs;
+using foodswap.DTOs.TokenDTOs;
 using foodswap.DTOs.UserDTOs;
 using foodswap.Identity;
 using foodswap.Validators;

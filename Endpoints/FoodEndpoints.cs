@@ -4,7 +4,7 @@ using foodswap.Filters;
 using Serilog;
 
 namespace foodswap.Endpoints;
-public class FoodEndpoints : CarterModule
+public class FoodEndpoints : BaseEndpoint
 {
     public FoodEndpoints()
         :base("/foods")
@@ -16,33 +16,45 @@ public class FoodEndpoints : CarterModule
     {
         app.MapGet("/", (IConfiguration configuration) =>
         {
-            return Results.Ok(new FoodResponse(){
-                Id = Guid.NewGuid(),
-                Name = "apple",
-                Portion = 100,
-                Calories = 52,
-                Carbohydrates = 0.1m,
-                Protein = 0.2m,
-                Fat = 0.3m,
-                Type = "VEGETABLE"});
-        });
+            return Ok(
+                new List<FoodResponse>()
+                {
+                    new FoodResponse()
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = "apple",
+                        Portion = 100,
+                        Calories = 52,
+                        Carbohydrates = 0.1m,
+                        Protein = 0.2m,
+                        Fat = 0.3m,
+                        Type = "VEGETABLE"
+                    }
+                }, "Foods retrieved successfully");
+        })
+        .RequireAuthorization(p => p.RequireRole("user", "admin"));
 
         app.MapGet("/{id}", (Guid id) =>
         {
-            return Results.Ok(new FoodResponse(){
-                Id = id,
-                Name = "apple",
-                Portion = 100,
-                Calories = 52,
-                Carbohydrates = 0.1m,
-                Protein = 0.2m,
-                Fat = 0.3m,
-                Type = "MEAT"});
+
+            return Ok(
+                new FoodResponse() 
+                {
+                    Id = id,
+                    Name = "apple",
+                    Portion = 100,
+                    Calories = 52,
+                    Carbohydrates = 0.1m,
+                    Protein = 0.2m,
+                    Fat = 0.3m,
+                    Type = "MEAT"
+                }, "Food retrieved successfully");
         });
 
         app.MapPost("/", (CreateFoodRequest request) =>
         {
-            return Results.Ok(new FoodResponse(){
+            return Ok(new FoodResponse()
+            {
                 Id = Guid.NewGuid(),
                 Name = request.Name,
                 Portion = request.Portion,
@@ -51,7 +63,7 @@ public class FoodEndpoints : CarterModule
                 Protein = request.Protein,
                 Fat = request.Fat,
                 Type = request.Type
-            });
+            }, "Food created successfully");
         })
         .AddEndpointFilter<ValidatorFilter<CreateFoodRequest>>();
     }

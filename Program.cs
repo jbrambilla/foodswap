@@ -19,6 +19,7 @@ var app = builder.Build();
 app
     .UseArchtectures()
     .UseGlobalErrorHandler()
+    .UseCustomUnauthorizedMiddleware()
     .MapCarter();
 
 await app.UseIdentitySeed();

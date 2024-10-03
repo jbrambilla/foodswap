@@ -15,7 +15,7 @@ public class ValidatorFilter<TRequest> : IEndpointFilter where TRequest : class
             .FirstOrDefault(x => x is TRequest)
             as TRequest;
         var result = await _validator.ValidateAsync(request!);
-        if (!result.IsValid) return Results.Json(result.GetFormattedErrors(), statusCode: 400);
+        if (!result.IsValid) return Results.BadRequest(new ApiResponse<object>(false, "Validation Error", null!, result.Errors.Select(x => x.ErrorMessage).ToList()));
         return await next(context);
     }
 }

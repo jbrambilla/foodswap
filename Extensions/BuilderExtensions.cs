@@ -22,6 +22,8 @@ public static class BuilderExtensions{
     {
         builder.Services.AddEndpointsApiExplorer();
 
+        builder.Services.AddSingleton<TokenProvider>();
+
         builder.Services.AddCarter();
 
         return builder;
@@ -72,8 +74,6 @@ public static class BuilderExtensions{
         builder.Services.AddScoped<IValidator<CreateUserRequest>, CreateUserRequestValidator>();
         builder.Services.AddScoped<IValidator<GetTokenRequest>, GetTokenRequestValidator>();
 
-        builder.Services.AddSingleton<TokenProvider>();
-
         return builder;
     }
 
@@ -116,6 +116,7 @@ public static class BuilderExtensions{
     public static WebApplicationBuilder AddIdentity(this WebApplicationBuilder builder)
     {
         builder.Services.AddIdentityCore<User>()
+            .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<AuthDbContext>()
             .AddDefaultTokenProviders();
 

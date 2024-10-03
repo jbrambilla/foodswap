@@ -1,4 +1,7 @@
 using System.Text.Json;
+using foodswap.Endpoints;
+using foodswap.Identity;
+using Microsoft.AspNetCore.Identity;
 using Serilog;
 
 namespace Extensions;
@@ -51,5 +54,27 @@ public static class AppExtensions
         });
 
         return app;
+    }
+    public static async Task UseIdentitySeed(this WebApplication app)
+    {
+        using (var scope = app.Services.CreateScope())
+        {
+            var services = scope.ServiceProvider;
+            var configuration = services.GetRequiredService<IConfiguration>();
+
+            try
+            {
+                var userManager = services.GetRequiredService<UserManager<User>>();
+                var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+                await IdentitySeedData.SeedRoles(roleManager, configuration);
+                await IdentitySeedData.SeedAdminUser(userManager, configuration);
+            }
+            catch (Exception ex)
+            {
+                // Lidar com exceções relacionadas ao seeding
+                Console.WriteLine($"Erro ao realizar o seeding de dados: {ex.Message}");
+            }
+        }
     }
 }

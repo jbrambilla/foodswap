@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace foodswap.Identity;
 public sealed class TokenProvider(IConfiguration configuration)
 {
-    public string Create(User user)
+    public string Create(User user, string[] roles)
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]!));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -17,7 +17,8 @@ public sealed class TokenProvider(IConfiguration configuration)
             [
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-                new Claim("email_confirmed", user.EmailConfirmed.ToString().ToLower())
+                new Claim("email_confirmed", user.EmailConfirmed.ToString().ToLower()),
+                new Claim("roles", string.Join(",", roles))
             ]),
             Expires = DateTime.UtcNow.AddMinutes(configuration.GetValue<int>("Jwt:ExpiryMinutes")),
             SigningCredentials = credentials,

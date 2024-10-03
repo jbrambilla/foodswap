@@ -3,6 +3,7 @@ using foodswap.DTOs.UserDTOs;
 using foodswap.Filters;
 using foodswap.Identity;
 using Microsoft.AspNetCore.Identity;
+using Serilog;
 
 public class UserEndpoints : CarterModule
 {
@@ -21,6 +22,12 @@ public class UserEndpoints : CarterModule
             if (!result.Succeeded) {
                 return Results.BadRequest(result.Errors);
             }
+
+            var resultAddRole = await userManager.AddToRoleAsync(user, "user");
+            if (!resultAddRole.Succeeded) {
+                Log.Error("Error adding role to the user {user}: {Error}", user.Email, resultAddRole.Errors);
+            }
+
             return Results.Ok("User created successfully");
         })
         .AddEndpointFilter<ValidatorFilter<CreateUserRequest>>();
@@ -37,7 +44,9 @@ public class UserEndpoints : CarterModule
                 return Results.BadRequest("Invalid email or password");
             }
 
-            var token = tokenProvider.Create(user);
+            var roles = await userManager.GetRolesAsync(user);
+
+            var token = tokenProvider.Create(user, roles.ToArray());
             return Results.Ok(token);
         })
         .AddEndpointFilter<ValidatorFilter<GetTokenRequest>>();

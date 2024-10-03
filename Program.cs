@@ -21,4 +21,6 @@ app
     .UseGlobalErrorHandler()
     .MapCarter();
 
+await app.UseIdentitySeed();
+
 app.Run();

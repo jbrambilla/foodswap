@@ -25,7 +25,7 @@ public class FoodEndpoints : CarterModule
                 Fat = 0.3m,
                 Type = "VEGETABLE"});
         })
-        .RequireAuthorization();
+        .RequireAuthorization(p => p.RequireRole("user"));
 
         app.MapGet("/{id}", (Guid id) =>
         {

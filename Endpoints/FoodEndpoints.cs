@@ -1,6 +1,7 @@
 using Carter;
 using foodswap.DTOs.FoodDTOs;
 using foodswap.Filters;
+using Serilog;
 
 namespace foodswap.Endpoints;
 public class FoodEndpoints : CarterModule
@@ -13,7 +14,7 @@ public class FoodEndpoints : CarterModule
     
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet("/", () =>
+        app.MapGet("/", (IConfiguration configuration) =>
         {
             return Results.Ok(new FoodResponse(){
                 Id = Guid.NewGuid(),
@@ -24,8 +25,7 @@ public class FoodEndpoints : CarterModule
                 Protein = 0.2m,
                 Fat = 0.3m,
                 Type = "VEGETABLE"});
-        })
-        .RequireAuthorization(p => p.RequireRole("user"));
+        });
 
         app.MapGet("/{id}", (Guid id) =>
         {

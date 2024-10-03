@@ -9,6 +9,12 @@ public static class IdentitySeedData
 
     public static async Task SeedRoles(RoleManager<IdentityRole> roleManager, IConfiguration configuration)
     {
+        var seeded = configuration.GetValue<bool>("Identity:Seeded:Roles");
+        if (seeded){
+            Log.Information("Roles already seeded.");
+            return;
+        }
+
         var roles = configuration.GetSection("Identity:Roles").Get<List<string>>();
         if (roles is null || roles.Count == 0)
         {
@@ -23,9 +29,17 @@ public static class IdentitySeedData
                 await roleManager.CreateAsync(new IdentityRole(role));
             }
         }
+
+        configuration["Identity:Seeded:Roles"] = "true";
     }
     public static async Task SeedAdminUser(UserManager<User> userManager, IConfiguration configuration)
     {
+        var seeded = configuration.GetValue<bool>("Identity:Seeded:AdminUser");
+        if (seeded){
+            Log.Information("Admin user already seeded.");
+            return;
+        }
+
         var adminUserName = configuration["Identity:AdminUser:Name"];
         var adminUserSurname = configuration["Identity:AdminUser:Surname"];
         var adminUserPhoneNumber = configuration["Identity:AdminUser:PhoneNumber"];
@@ -46,15 +60,19 @@ public static class IdentitySeedData
         var adminUser = await userManager.FindByEmailAsync(adminUserEmail);
         if (adminUser == null)
         {
-            var user = new User(adminUserName, adminUserSurname, adminUserEmail, adminUserPhoneNumber, adminUserBirthDate);
+            var user = new User(adminUserName, adminUserSurname, adminUserEmail, adminUserPhoneNumber, adminUserBirthDate) 
+            { 
+                PhoneNumberConfirmed = true, 
+                EmailConfirmed = true 
+            };
+            
             var result = await userManager.CreateAsync(user, adminUserPassword);
 
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(user, "Admin");
-
-                var emailConfirmationToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
-                await userManager.ConfirmEmailAsync(user, emailConfirmationToken);}
+                configuration["Identity:Seeded:AdminUser"] = "true";
+            }
         }
     }
 }

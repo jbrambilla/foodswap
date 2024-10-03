@@ -1,4 +1,4 @@
-namespace foodswap.Endpoints;
+namespace foodswap.DTOs.RoleDTOs;
 
 public class CreateRoleRequest
 {

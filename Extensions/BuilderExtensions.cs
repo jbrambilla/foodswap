@@ -1,6 +1,7 @@
 using System.Text;
 using Carter;
 using FluentValidation;
+using foodswap;
 using foodswap.DTOs.FoodDTOs;
 using foodswap.DTOs.TokenDTOs;
 using foodswap.DTOs.UserDTOs;
@@ -19,12 +20,8 @@ using Serilog.Sinks.MSSqlServer;
 
 namespace Extensions;
 public static class BuilderExtensions{
-    public static WebApplicationBuilder AddArchtectures(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddCarter(this WebApplicationBuilder builder)
     {
-        builder.Services.AddEndpointsApiExplorer();
-
-        builder.Services.AddSingleton<TokenProvider>();
-
         builder.Services.AddCarter();
 
         return builder;
@@ -56,6 +53,7 @@ public static class BuilderExtensions{
 
     public static WebApplicationBuilder AddSwaggerWithAuth(this WebApplicationBuilder builder)
     {
+        builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(o =>
         {
             o.CustomSchemaIds(id => id.FullName!.Replace('+', '-'));
@@ -88,6 +86,10 @@ public static class BuilderExtensions{
             };
 
             o.AddSecurityRequirement(securityRequirement);
+
+            o.SchemaFilter<ApiResponseSchemaFilter>();
+
+            o.SwaggerDoc("v1", new OpenApiInfo{ Title = "FoodSwap API", Version = "v1" });
         });
 
         return builder;
@@ -99,6 +101,7 @@ public static class BuilderExtensions{
         builder.Services.AddScoped<IValidator<CreateUserRequest>, CreateUserRequestValidator>();
         builder.Services.AddScoped<IValidator<GetTokenRequest>, GetTokenRequestValidator>();
 
+        builder.Services.AddSingleton<TokenProvider>();
         return builder;
     }
 
@@ -158,7 +161,11 @@ public static class BuilderExtensions{
         builder.Services.AddDbContext<AuthDbContext>(options => 
             options.UseSqlServer(connectionStringsOptions.DefaultConnection));
 
-        builder.Services.AddAuthorization();
+        builder.Services.AddAuthorization(options => 
+        {
+            options.AddPolicy("AdminOrUser", policy => policy.RequireRole("admin", "user"));
+        });
+        
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {

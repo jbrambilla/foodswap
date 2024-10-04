@@ -7,11 +7,11 @@ try {
     var builder = WebApplication.CreateBuilder(args);
 
     builder
-        .AddArchtectures()
         .AddLog()
         .AddOptions()
         .AddSwaggerWithAuth()
         .AddServices()
+        .AddCarter()
         .AddHttpLogging()
         .AddIdentity();
         

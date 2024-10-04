@@ -1,6 +1,7 @@
 using Carter;
 using foodswap.DTOs.FoodDTOs;
 using foodswap.Filters;
+using Microsoft.AspNetCore.Authorization;
 using Serilog;
 
 namespace foodswap.Endpoints;
@@ -10,6 +11,7 @@ public class FoodEndpoints : BaseEndpoint
         :base("/foods")
     {
         WithTags("Foods");
+        RequireAuthorization("AdminOrUser");
     }
     
     public override void AddRoutes(IEndpointRouteBuilder app)
@@ -32,7 +34,8 @@ public class FoodEndpoints : BaseEndpoint
                     }
                 }, "Foods retrieved successfully");
         })
-        .RequireAuthorization(p => p.RequireRole("user", "admin"));
+        .Produces<ApiResponse<List<FoodResponse>>>(200)
+        .WithSummaryAndDescription("Retrieve all Foods", "Retrieve all Foods");
 
         app.MapGet("/{id}", (Guid id) =>
         {
@@ -49,11 +52,15 @@ public class FoodEndpoints : BaseEndpoint
                     Fat = 0.3m,
                     Type = "MEAT"
                 }, "Food retrieved successfully");
-        });
+        })
+        .WithIdDescription("The Id associated with the created Food")
+        .WithSummaryAndDescription("Retrieve a Food by Id", "Retrieve a specific Food by it's associated Id")
+        .Produces<ApiResponse<FoodResponse>>(200)
+        .Produces<ApiResponse<object>>(404, "application/json");
 
         app.MapPost("/", (CreateFoodRequest request) =>
         {
-            return Ok(new FoodResponse()
+            return Created(new FoodResponse()
             {
                 Id = Guid.NewGuid(),
                 Name = request.Name,
@@ -65,6 +72,11 @@ public class FoodEndpoints : BaseEndpoint
                 Type = request.Type
             }, "Food created successfully");
         })
-        .AddEndpointFilter<ValidatorFilter<CreateFoodRequest>>();
+        .AddEndpointFilter<ValidatorFilter<CreateFoodRequest>>()
+        .WithSummaryAndDescription("Create a new Food", "Create a new Food in the database")
+        .Accepts<CreateFoodRequest>("application/json")
+        .Produces<ApiResponse<FoodResponse>>(201)
+        .Produces<ApiResponse<object>>(400);
+
     }
 }

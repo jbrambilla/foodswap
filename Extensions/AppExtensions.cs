@@ -11,11 +11,12 @@ public static class AppExtensions
 {
     public static WebApplication UseArchtectures(this WebApplication app)
     {
-        if (app.Environment.IsDevelopment())
+        app.UseSwagger();
+        app.UseSwaggerUI(config =>
         {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
+            config.SwaggerEndpoint("/swagger/v1/swagger.json", "FoodSwap API");
+            config.RoutePrefix = string.Empty;
+        });
 
         app.UseHttpLogging();
 

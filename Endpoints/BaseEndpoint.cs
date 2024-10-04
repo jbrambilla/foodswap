@@ -7,11 +7,18 @@ public abstract class BaseEndpoint : CarterModule
     public BaseEndpoint(string basePath) 
         : base(basePath)
     {
-        
     }
     protected IResult Ok<T>(T data, string message = "")
     {
         return Results.Ok(
+            new ApiResponse<T>(true, message, data)
+        );
+    }
+
+    protected IResult Created<T>(T data, string message = "")
+    {
+        return Results.Created(
+            string.Empty,
             new ApiResponse<T>(true, message, data)
         );
     }

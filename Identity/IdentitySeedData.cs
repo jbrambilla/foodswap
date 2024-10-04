@@ -44,13 +44,9 @@ public static class IdentitySeedData
         if (adminUser == null)
         {
             var user = new User(
-                identitySeedOptions.AdminUser.Name, 
-                identitySeedOptions.AdminUser.Surname,
-                identitySeedOptions.AdminUser.Email,
-                identitySeedOptions.AdminUser.PhoneNumber,
-                identitySeedOptions.AdminUser.BirthDate)
+                identitySeedOptions.AdminUser.Name,
+                identitySeedOptions.AdminUser.Email)
             { 
-                PhoneNumberConfirmed = true, 
                 EmailConfirmed = true 
             };
             

@@ -13,14 +13,7 @@ public class AuthDbContext : IdentityDbContext<User>
     {
         base.OnModelCreating(builder);
 
-        builder.Entity<User>().Property(u => u.Name)
-            .HasColumnType("varchar(100)");
-
-        builder.Entity<User>().Property(u => u.Surname)
-            .HasColumnType("varchar(100)");
-
-        builder.Entity<User>().Property(u => u.BirthDate)
-            .HasColumnType("datetime");
+        builder.Entity<User>().Property(u => u.Name).HasMaxLength(200);
 
         builder.HasDefaultSchema("identity");
     }

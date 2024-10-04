@@ -10,7 +10,7 @@ namespace foodswap.Endpoints;
 public class TokenEndpoints : BaseEndpoint
 {
     public TokenEndpoints()
-        : base("/token")
+        : base("api/v1/token")
     {
         WithTags("Token");
     }

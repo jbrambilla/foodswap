@@ -16,12 +16,6 @@ public class AdminUser
     [Required]
     public required string Name { get; init; }
     [Required]
-    public required string Surname { get; init; }
-    [Required]
-    public required string PhoneNumber { get; init; }
-    [Required]
-    public required DateTime BirthDate { get; init; }
-    [Required]
     public required string Email { get; init; }
     [Required]
     [MinLength(8)]

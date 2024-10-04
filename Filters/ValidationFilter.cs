@@ -1,4 +1,3 @@
-using Carter.ModelBinding;
 using FluentValidation;
 namespace foodswap.Filters;
 public class ValidatorFilter<TRequest> : IEndpointFilter where TRequest : class

@@ -1,14 +1,12 @@
 using Carter;
 using foodswap.DTOs.FoodDTOs;
 using foodswap.Filters;
-using Microsoft.AspNetCore.Authorization;
-using Serilog;
 
 namespace foodswap.Endpoints;
 public class FoodEndpoints : BaseEndpoint
 {
     public FoodEndpoints()
-        :base("/foods")
+        :base("api/v1/foods")
     {
         WithTags("Foods");
         RequireAuthorization("AdminOrUser");

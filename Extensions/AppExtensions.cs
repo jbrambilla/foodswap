@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using foodswap;
 using foodswap.Endpoints;
@@ -14,7 +15,7 @@ public static class AppExtensions
         app.UseSwagger();
         app.UseSwaggerUI(config =>
         {
-            config.SwaggerEndpoint("/swagger/v1/swagger.json", "FoodSwap API");
+            config.SwaggerEndpoint("/swagger/v1/swagger.json", "FoodSwap API v1");
             config.RoutePrefix = string.Empty;
         });
 
@@ -36,9 +37,9 @@ public static class AppExtensions
                 Log.ForContext("HttpMethod", context.Request.Method) 
                     .ForContext("Path", context.Request.Path) 
                     .Error(ex, "Unexpected error in application.");
-
+                
                 context.Response.StatusCode = 500;
-                var errorMessage = "An unexpected error has occurred in the server.";
+                var errorMessage = "An unexpected error has occurred in the server. Please, contact support.";
 
                 if (ex.InnerException is JsonException jsonEx)
                 {

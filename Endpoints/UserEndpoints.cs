@@ -9,7 +9,7 @@ namespace foodswap.Endpoints;
 public class UserEndpoints : BaseEndpoint
 {
     public UserEndpoints()
-        : base("/users")
+        : base("api/v1/users")
     {
         WithTags("Users");
     }
@@ -18,7 +18,7 @@ public class UserEndpoints : BaseEndpoint
     {
         app.MapPost("/", async (CreateUserRequest request, UserManager<User> userManager) =>
         {
-            var user = new User(request.Name, request.Surname, request.Email, request.PhoneNumber, request.BirthDate);
+            var user = new User(request.Name, request.Email);
             var result = await userManager.CreateAsync(user, request.Password);
             if (!result.Succeeded) {
                 return BadRequest(result.Errors, "Error creating user");

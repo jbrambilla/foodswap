@@ -8,7 +8,7 @@ namespace foodswap.Endpoints;
 public class RoleEndpoints : BaseEndpoint
 {
     public RoleEndpoints()
-        : base("/roles")
+        : base("api/v1/roles")
     {
         WithTags("Roles");
     }

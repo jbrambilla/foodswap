@@ -11,6 +11,7 @@ public class RoleEndpoints : BaseEndpoint
         : base("api/v1/roles")
     {
         WithTags("Roles");
+        RequireAuthorization("Admin");
     }
 
     public override void AddRoutes(IEndpointRouteBuilder app)

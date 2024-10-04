@@ -11,6 +11,7 @@ using foodswap.Validators;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -100,6 +101,10 @@ public static class BuilderExtensions{
         builder.Services.AddScoped<IValidator<CreateFoodRequest>, CreateFoodRequestValidator>();
         builder.Services.AddScoped<IValidator<CreateUserRequest>, CreateUserRequestValidator>();
         builder.Services.AddScoped<IValidator<GetTokenRequest>, GetTokenRequestValidator>();
+        builder.Services.AddScoped<IValidator<ChangePasswordRequest>, ChangePasswordRequestValidator>();
+        builder.Services.AddScoped<IValidator<ForgotPasswordRequest>, ForgotPasswordRequestValidator>();
+        builder.Services.AddScoped<IValidator<ConfirmEmailRequest>, ConfirmEmailRequestValidator>();
+        builder.Services.AddScoped<IValidator<ResetPasswordRequest>, ResetPasswordRequestValidator>();
 
         builder.Services.AddSingleton<TokenProvider>();
         return builder;
@@ -164,6 +169,7 @@ public static class BuilderExtensions{
         builder.Services.AddAuthorization(options => 
         {
             options.AddPolicy("AdminOrUser", policy => policy.RequireRole("admin", "user"));
+            options.AddPolicy("Admin", policy => policy.RequireRole("admin"));
         });
         
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

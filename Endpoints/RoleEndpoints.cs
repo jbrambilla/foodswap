@@ -30,12 +30,14 @@ public class RoleEndpoints : BaseEndpoint
             }
 
             return Ok(request, "Role created successfully");
-        });
+        })
+        .ExcludeFromDescription();
 
         app.MapGet("/", async (RoleManager<IdentityRole> roleManager) =>
         {
             var roles = await roleManager.Roles.ToListAsync();
             return Ok(roles, "Roles retrieved successfully");
-        });
+        })
+        .ExcludeFromDescription();
     }
 }

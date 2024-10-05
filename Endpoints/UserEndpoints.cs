@@ -98,18 +98,18 @@ public class UserEndpoints : BaseEndpoint
             var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
 
             //TODO: Implement email sending
-            return Ok(new { UserId = user.Id, Token = token });
+            return Ok(new { Email = user.Email, ConfirmationToken = token });
         })
         .RequireAuthorization("AdminOrUser");
 
         app.MapPost("/confirm-email", async (ConfirmEmailRequest request, UserManager<User> userManager) =>
         {
-            var user = await userManager.FindByIdAsync(request.UserId);
+            var user = await userManager.FindByEmailAsync(request.Email);
             if (user == null) {
                 return BadRequest(new List<string> { "User not found" }, "Error confirming email");
             }
 
-            var result = await userManager.ConfirmEmailAsync(user, request.Token);
+            var result = await userManager.ConfirmEmailAsync(user, request.ConfirmationToken);
             if (!result.Succeeded) {
                 return BadRequest(result.Errors, "Error confirming email");
             }

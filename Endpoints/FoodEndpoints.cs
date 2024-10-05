@@ -1,6 +1,8 @@
 using Carter;
+using foodswap.Business.Models;
 using foodswap.DTOs.FoodDTOs;
 using foodswap.Filters;
+using Mapster;
 
 namespace foodswap.Endpoints;
 public class FoodEndpoints : BaseEndpoint
@@ -23,11 +25,11 @@ public class FoodEndpoints : BaseEndpoint
                     {
                         Id = Guid.NewGuid(),
                         Name = "apple",
-                        Portion = 100,
+                        ServingSize = 100,
                         Calories = 52,
-                        Carbohydrates = 0.1m,
-                        Protein = 0.2m,
-                        Fat = 0.3m,
+                        Carbohydrates = 11m,
+                        Protein = 5m,
+                        Fat = 3m,
                         Type = "VEGETABLE"
                     }
                 }, "Foods retrieved successfully");
@@ -43,7 +45,7 @@ public class FoodEndpoints : BaseEndpoint
                 {
                     Id = id,
                     Name = "apple",
-                    Portion = 100,
+                    ServingSize = 100,
                     Calories = 52,
                     Carbohydrates = 0.1m,
                     Protein = 0.2m,
@@ -58,17 +60,8 @@ public class FoodEndpoints : BaseEndpoint
 
         app.MapPost("/", (CreateFoodRequest request) =>
         {
-            return Created(new FoodResponse()
-            {
-                Id = Guid.NewGuid(),
-                Name = request.Name,
-                Portion = request.Portion,
-                Calories = request.Calories,
-                Carbohydrates = request.Carbohydrates,
-                Protein = request.Protein,
-                Fat = request.Fat,
-                Type = request.Type
-            }, "Food created successfully");
+            var food = new Food(request.Name, request.ServingSize, request.Calories, request.Carbohydrates, request.Protein, request.Fat, request.Type);
+            return Created(food.Adapt<FoodResponse>(), "Food created successfully");
         })
         .AddEndpointFilter<ValidatorFilter<CreateFoodRequest>>()
         .WithSummaryAndDescription("Create a new Food", "Create a new Food in the database")

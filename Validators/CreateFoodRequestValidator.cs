@@ -8,7 +8,7 @@ public class CreateFoodRequestValidator : AbstractValidator<CreateFoodRequest>
     public CreateFoodRequestValidator()
     {
         RuleFor(x => x.Name).NotEmpty();
-        RuleFor(x => x.Portion).GreaterThan(0);
+        RuleFor(x => x.ServingSize).GreaterThan(0);
         RuleFor(x => x.Calories).GreaterThan(0);
         RuleFor(x => x.Carbohydrates).GreaterThan(0);
         RuleFor(x => x.Protein).GreaterThan(0);

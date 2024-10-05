@@ -1,4 +1,5 @@
 using Carter;
+using foodswap.Business.Interfaces.Services;
 using foodswap.Business.Models;
 using foodswap.DTOs.FoodDTOs;
 using foodswap.Filters;
@@ -16,7 +17,7 @@ public class FoodEndpoints : BaseEndpoint
     
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet("/", (IConfiguration configuration) =>
+        app.MapGet("/", async () =>
         {
             return Ok(
                 new List<FoodResponse>()

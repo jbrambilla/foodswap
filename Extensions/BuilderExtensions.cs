@@ -2,11 +2,13 @@ using System.Text;
 using Carter;
 using FluentValidation;
 using foodswap;
+using foodswap.Business.Interfaces.Services;
 using foodswap.DTOs.FoodDTOs;
 using foodswap.DTOs.TokenDTOs;
 using foodswap.DTOs.UserDTOs;
 using foodswap.Identity;
 using foodswap.Options;
+using foodswap.Services;
 using foodswap.Validators;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
@@ -47,6 +49,12 @@ public static class BuilderExtensions{
         builder.Services
             .AddOptions<JwtOptions>()
             .Bind(builder.Configuration.GetSection(JwtOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        builder.Services
+            .AddOptions<EmailSettingsOptions>()
+            .Bind(builder.Configuration.GetSection(EmailSettingsOptions.SectionName))
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
@@ -106,6 +114,8 @@ public static class BuilderExtensions{
         builder.Services.AddScoped<IValidator<ForgotPasswordRequest>, ForgotPasswordRequestValidator>();
         builder.Services.AddScoped<IValidator<ConfirmEmailRequest>, ConfirmEmailRequestValidator>();
         builder.Services.AddScoped<IValidator<ResetPasswordRequest>, ResetPasswordRequestValidator>();
+
+        builder.Services.AddScoped<IEmailService, EmailService>();
 
         builder.Services.AddSingleton<TokenProvider>();
         return builder;

@@ -1,6 +1,7 @@
 using FluentValidation;
+using foodswap.DTOs.UserDTOs;
 
-namespace foodswap.DTOs.UserDTOs;
+namespace foodswap.Validators.UserEndpointsValidators;
 
 public class CreateUserRequestValidator : AbstractValidator<CreateUserRequest>
 {

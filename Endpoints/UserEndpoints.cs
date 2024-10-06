@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Azure.Core;
 using Carter;
 using foodswap.Business.Interfaces.Services;
 using foodswap.DTOs.UserDTOs;
@@ -19,7 +20,7 @@ public class UserEndpoints : BaseEndpoint
 
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapPost("/", async (CreateUserRequest request, UserManager<User> userManager) =>
+        app.MapPost("/", async (CreateUserRequest request, UserManager<User> userManager, IEmailService emailService) =>
         {
             var user = new User(request.Name, request.Email);
             var result = await userManager.CreateAsync(user, request.Password);
@@ -31,6 +32,11 @@ public class UserEndpoints : BaseEndpoint
             if (!resultAddRole.Succeeded) {
                 Log.Error("Error adding role to the user {user}: {Error}", user.Email, resultAddRole.Errors);
             }
+
+            var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            await emailService.SendEmailAsync(user.Email!, "Confirme seu e-mail", $"Token: {token}");
+
             return Ok(user, "User created successfully");
         })
         .AddEndpointFilter<ValidatorFilter<CreateUserRequest>>();
@@ -57,14 +63,14 @@ public class UserEndpoints : BaseEndpoint
         })
         .AddEndpointFilter<ValidatorFilter<ForgotPasswordRequest>>();
 
-        app.MapPost("/reset-password", async (ResetPasswordRequest request, UserManager<User> userManager) =>
+        app.MapPost("/reset-password", async (UserResetPasswordRequest request, UserManager<User> userManager) =>
         {
-            var user = await userManager.FindByEmailAsync(request.Email);
+            var user = await userManager.FindByIdAsync(request.UserId);
             if (user == null) {
                 return BadRequest(["User not found"], "Error resetting password");
             }
 
-            var result = await userManager.ResetPasswordAsync(user, request.ResetCode, request.NewPassword);
+            var result = await userManager.ResetPasswordAsync(user, request.Token, request.NewPassword);
             if (!result.Succeeded) {
                 return BadRequest(result.Errors, "Error resetting password");
             }
@@ -75,9 +81,8 @@ public class UserEndpoints : BaseEndpoint
 
         app.MapPost("/change-password", async (ChangePasswordRequest request, UserManager<User> userManager, HttpContext httpContext) =>
         {
-            var user = await GetUser(userManager, httpContext);
-            if (user == null)
-            {
+            var user = await userManager.GetUserAsync(httpContext.User);
+            if (user == null) {
                 return Results.Unauthorized();
             }
 
@@ -90,9 +95,9 @@ public class UserEndpoints : BaseEndpoint
         .AddEndpointFilter<ValidatorFilter<ChangePasswordRequest>>()
         .RequireAuthorization("AdminOrUser");
 
-        app.MapGet("/send-emailconfirmationtoken", async (UserManager<User> userManager, HttpContext httpContext, IEmailService emailService) =>
+        app.MapGet("/request-email-confirmation", async (UserManager<User> userManager, HttpContext httpContext, IEmailService emailService) =>
         {
-            var user = await GetUser(userManager, httpContext);
+            var user = await userManager.GetUserAsync(httpContext.User);
             if (user == null) {
                 return Results.Unauthorized();
             }
@@ -103,20 +108,62 @@ public class UserEndpoints : BaseEndpoint
 
             var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
 
-            await emailService.SendEmailAsync(user.Email!, "Confirme seu e-mail", $"Token: {token}");
+            await emailService.SendEmailAsync(user.Email!, "Confirme seu e-mail", $"Token: {token} UserId: {user.Id}");
 
             return Ok("An e-mail was sent with a confirmation link to confirm your e-mail");
         })
         .RequireAuthorization("AdminOrUser");
 
+        //TODO: criar validator
+        app.MapPost("/request-email-change", async (RequestEmailChangeRequest request, UserManager<User> userManager, HttpContext httpContext, IEmailService emailService) =>
+        {
+            var user = await userManager.GetUserAsync(httpContext.User);
+            if (user == null) {
+                return Results.Unauthorized();
+            }
+
+            var token = await userManager.GenerateChangeEmailTokenAsync(user, request.NewEmail);
+
+            await emailService.SendEmailAsync(request.NewEmail, "Confirme seu novo e-mail", $"Token: {token} UserId: {user.Id}");
+            return Ok("An e-mail was sent with a confirmation link to confirm your e-mail");
+
+            //return Ok(new {userId = user.Id, request.NewEmail, token}, "An e-mail was sent with a confirmation link to confirm your e-mail");
+        })
+        .RequireAuthorization("AdminOrUser");
+
+        // TODO: criar validator
+        app.MapPost("/change-email", async (ChangeEmailRequest request, UserManager<User> userManager, HttpContext httpContext, AuthDbContext authDbContext) =>
+        {
+            using (var transaction = await authDbContext.Database.BeginTransactionAsync()) 
+            {
+                var user = await userManager.FindByIdAsync(request.UserId);
+                if (user == null) {
+                    return BadRequest(["User not found"], "Error changing e-mail");
+                }
+
+                var changeEmailResult = await userManager.ChangeEmailAsync(user, request.NewEmail, request.Token);
+                if (!changeEmailResult.Succeeded) {
+                    return BadRequest(changeEmailResult.Errors, "Error changing e-mail");
+                }
+
+                var setUserNameResult = await userManager.SetUserNameAsync(user, request.NewEmail);
+                if (!setUserNameResult.Succeeded) {
+                    return BadRequest(setUserNameResult.Errors, "Error changing e-mail");
+                }
+
+                await transaction.CommitAsync();
+                return Ok("E-mail changed successfully");
+            }
+        });
+
         app.MapPost("/confirm-email", async (ConfirmEmailRequest request, UserManager<User> userManager) =>
         {
-            var user = await userManager.FindByEmailAsync(request.Email);
+            var user = await userManager.FindByIdAsync(request.UserId);
             if (user == null) {
                 return BadRequest(["User not found"], "Error confirming e-mail");
             }
 
-            var result = await userManager.ConfirmEmailAsync(user, request.ConfirmationToken);
+            var result = await userManager.ConfirmEmailAsync(user, request.Token);
             if (!result.Succeeded) {
                 return BadRequest(result.Errors, "Error confirming e-mail");
             }
@@ -124,17 +171,5 @@ public class UserEndpoints : BaseEndpoint
             return Ok("E-mail confirmed successfully");
         })
         .AddEndpointFilter<ValidatorFilter<ConfirmEmailRequest>>();
-    }
-
-    private async Task<User> GetUser(UserManager<User> userManager, HttpContext httpContext)
-    {
-        var userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userId))
-        {
-            return null!;
-        }
-
-        var user = await userManager.FindByIdAsync(userId);
-        return user!;
     }
 }

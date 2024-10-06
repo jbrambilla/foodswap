@@ -1,7 +1,7 @@
 using FluentValidation;
 using foodswap.DTOs.UserDTOs;
 
-namespace foodswap.Validators;
+namespace foodswap.Validators.UserEndpointsValidators;
 
 public class ChangePasswordRequestValidator : AbstractValidator<ChangePasswordRequest>
 {

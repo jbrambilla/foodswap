@@ -10,6 +10,9 @@ using foodswap.Identity;
 using foodswap.Options;
 using foodswap.Services;
 using foodswap.Validators;
+using foodswap.Validators.FoodEndpointsValidators;
+using foodswap.Validators.TokenEndpointsValidators;
+using foodswap.Validators.UserEndpointsValidators;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Identity;
@@ -113,7 +116,7 @@ public static class BuilderExtensions{
         builder.Services.AddScoped<IValidator<ChangePasswordRequest>, ChangePasswordRequestValidator>();
         builder.Services.AddScoped<IValidator<ForgotPasswordRequest>, ForgotPasswordRequestValidator>();
         builder.Services.AddScoped<IValidator<ConfirmEmailRequest>, ConfirmEmailRequestValidator>();
-        builder.Services.AddScoped<IValidator<ResetPasswordRequest>, ResetPasswordRequestValidator>();
+        builder.Services.AddScoped<IValidator<UserResetPasswordRequest>, UserResetPasswordRequestValidator>();
 
         builder.Services.AddScoped<IEmailService, EmailService>();
 

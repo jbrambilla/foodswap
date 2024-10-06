@@ -2,7 +2,7 @@ using FluentValidation;
 using foodswap.Business.Models;
 using foodswap.DTOs.FoodDTOs;
 
-namespace foodswap.Validators;
+namespace foodswap.Validators.FoodEndpointsValidators;
 public class CreateFoodRequestValidator : AbstractValidator<CreateFoodRequest>
 {
     public CreateFoodRequestValidator()

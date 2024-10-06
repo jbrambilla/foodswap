@@ -12,14 +12,14 @@ public class CreateFoodRequestValidator : AbstractValidator<CreateFoodRequest>
         RuleFor(x => x.Carbohydrates).GreaterThan(0);
         RuleFor(x => x.Protein).GreaterThan(0);
         RuleFor(x => x.Fat).GreaterThan(0);
-        RuleFor(x => x.Type)
+        RuleFor(x => x.Category)
             .NotEmpty()
             .Must(BeValidFoodType)
-            .WithMessage($"The type mu be one of the following: {string.Join(", ", FoodTypes.GetTypes())}.");
+            .WithMessage($"The type mu be one of the following: {string.Join(", ", FoodCategories.GetCategories())}.");
     }
 
     private bool BeValidFoodType(string type)
     {
-        return FoodTypes.GetTypes().Contains(type);
+        return FoodCategories.GetCategories().Contains(type);
     }
 }

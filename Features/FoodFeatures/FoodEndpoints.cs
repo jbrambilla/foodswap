@@ -31,7 +31,7 @@ public class FoodEndpoints : BaseEndpoint
                         Carbohydrates = 11m,
                         Protein = 5m,
                         Fat = 3m,
-                        Type = "VEGETABLE"
+                        Category = "VEGETABLE"
                     }
                 }, "Foods retrieved successfully");
         })
@@ -51,7 +51,7 @@ public class FoodEndpoints : BaseEndpoint
                     Carbohydrates = 0.1m,
                     Protein = 0.2m,
                     Fat = 0.3m,
-                    Type = "MEAT"
+                    Category = "MEAT"
                 }, "Food retrieved successfully");
         })
         .WithIdDescription("The Id associated with the created Food")
@@ -61,7 +61,7 @@ public class FoodEndpoints : BaseEndpoint
 
         app.MapPost("/", (CreateFoodRequest request) =>
         {
-            var food = new Food(request.Name, request.ServingSize, request.Calories, request.Carbohydrates, request.Protein, request.Fat, request.Type);
+            var food = new Food(request.Name, request.ServingSize, request.Calories, request.Carbohydrates, request.Protein, request.Fat, request.Category);
             return Created(food.Adapt<FoodResponse>(), "Food created successfully");
         })
         .AddEndpointFilter<ValidatorFilter<CreateFoodRequest>>()

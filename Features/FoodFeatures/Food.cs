@@ -3,11 +3,11 @@ using foodswap.Common.Models;
 namespace foodswap.Features.FoodFeatures;
 public class Food : BaseModel
 {
-    public Food(string name, int servingSize, decimal calories, decimal carbohydrates, decimal protein, decimal fat, string type)
+    public Food(string name, int servingSize, decimal calories, decimal carbohydrates, decimal protein, decimal fat, string category)
     {
         Name = name;
         ServingSize = servingSize;
-        Type = type;
+        Category = category;
         Calories = calories;
         Carbohydrates = carbohydrates;
         Protein = protein;
@@ -21,7 +21,7 @@ public class Food : BaseModel
     }
     public string Name { get; private set; } = string.Empty;
     public int ServingSize { get; private set; }
-    public string Type { get; private set; }
+    public string Category { get; private set; }
     public decimal Calories { get; private set; }
     public decimal Carbohydrates { get; private set; }
     public decimal Protein { get; private set; }
@@ -34,11 +34,11 @@ public class Food : BaseModel
 
     public bool Active { get; private set; }
 
-    public void Update(string name, int servingSize, string type, decimal calories, decimal carbohydrates, decimal protein, decimal fat)
+    public void Update(string name, int servingSize, string category, decimal calories, decimal carbohydrates, decimal protein, decimal fat)
     {
         Name = name;
         ServingSize = servingSize;
-        Type = type;
+        Category = category;
         Calories = calories;
         Carbohydrates = carbohydrates;
         Protein = protein;
@@ -61,7 +61,7 @@ public class Food : BaseModel
     }
 }
 
-public static class FoodTypes 
+public static class FoodCategories
 {
     public const string VEGETABLE = "VEGETABLE";
     public const string FRUIT = "FRUIT";
@@ -70,5 +70,5 @@ public static class FoodTypes
     public const string GRAIN = "GRAIN";
     public const string OTHER = "OTHER";
 
-    public static List<string> GetTypes() => new List<string> { VEGETABLE, FRUIT, MEAT, DAIRY, GRAIN, OTHER };
+    public static List<string> GetCategories() => new List<string> { VEGETABLE, FRUIT, MEAT, DAIRY, GRAIN, OTHER };
 }

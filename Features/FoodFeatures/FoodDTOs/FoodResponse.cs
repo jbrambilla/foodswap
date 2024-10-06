@@ -12,5 +12,5 @@ public class FoodResponse
     public decimal CarbohydratesPerGram { get; set; }
     public decimal ProteinPerGram { get; set; }
     public decimal FatPerGram { get; set; }
-    public string Type { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
 }

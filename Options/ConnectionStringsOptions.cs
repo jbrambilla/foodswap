@@ -7,6 +7,4 @@ public class ConnectionStringsOptions
     public const string SectionName = "ConnectionStrings";
     [Required]
     public required string DefaultConnection { get; init; }
-    [Required]
-    public required string AuditConnection { get; init; }
 }

@@ -23,7 +23,6 @@ using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Events;
-using Serilog.Sinks.MSSqlServer;
 
 namespace Extensions;
 public static class BuilderExtensions{
@@ -58,6 +57,12 @@ public static class BuilderExtensions{
         builder.Services
             .AddOptions<EmailSettingsOptions>()
             .Bind(builder.Configuration.GetSection(EmailSettingsOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        builder.Services
+            .AddOptions<SentrySettingsOptions>()
+            .Bind(builder.Configuration.GetSection(SentrySettingsOptions.SectionName))
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
@@ -141,19 +146,36 @@ public static class BuilderExtensions{
 
     public static WebApplicationBuilder AddLog(this WebApplicationBuilder builder)
     {
+        var sentrySettingsOptions = builder.Configuration
+            .GetSection(SentrySettingsOptions.SectionName)
+            .Get<SentrySettingsOptions>();
+
+        if (sentrySettingsOptions == null) {
+            builder.Host.UseSerilog((ctx, lc) => lc
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
+                .WriteTo.File(
+                    path: "logs/info-.txt",
+                    rollingInterval: RollingInterval.Day,
+                    restrictedToMinimumLevel: LogEventLevel.Information,
+                    retainedFileCountLimit: 7
+                ));
+            return builder;
+        }
+
         builder.Host.UseSerilog((ctx, lc) => lc
-            .Enrich.WithProperty("ApplicationName", "FoodSwap")
-            .Enrich.WithProperty("Environment", builder.Environment.EnvironmentName)
             .Enrich.FromLogContext()
             .WriteTo.Console()
-            .WriteTo.MSSqlServer(
-                builder.Configuration.GetConnectionString("AuditConnection"),
-                sinkOptions: new MSSqlServerSinkOptions
-                {
-                    TableName = "Logs",
-                    AutoCreateSqlTable = true
-                },
-                restrictedToMinimumLevel: LogEventLevel.Information
+            .WriteTo.File(
+                path: "logs/info-.txt",
+                rollingInterval: RollingInterval.Day,
+                restrictedToMinimumLevel: LogEventLevel.Information,
+                retainedFileCountLimit: 7
+            )
+            .WriteTo.Sentry(
+                dsn: sentrySettingsOptions.Dsn,
+                environment: builder.Environment.EnvironmentName,
+                restrictedToMinimumLevel: LogEventLevel.Warning
             )
         );
 

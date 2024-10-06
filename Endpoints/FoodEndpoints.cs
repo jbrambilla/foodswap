@@ -17,7 +17,7 @@ public class FoodEndpoints : BaseEndpoint
     
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet("/", async () =>
+        app.MapGet("/", () =>
         {
             return Ok(
                 new List<FoodResponse>()

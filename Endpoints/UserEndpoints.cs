@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Carter;
+using foodswap.Business.Interfaces.Services;
 using foodswap.DTOs.UserDTOs;
 using foodswap.Filters;
 using foodswap.Identity;
@@ -23,31 +24,36 @@ public class UserEndpoints : BaseEndpoint
             var user = new User(request.Name, request.Email);
             var result = await userManager.CreateAsync(user, request.Password);
             if (!result.Succeeded) {
-                return BadRequest(result.Errors, "Error creating user");
+                return BadRequest(result.Errors, "Erro ao criar usuario");
             }
 
             var resultAddRole = await userManager.AddToRoleAsync(user, "user");
             if (!resultAddRole.Succeeded) {
                 Log.Error("Error adding role to the user {user}: {Error}", user.Email, resultAddRole.Errors);
             }
-            return Ok(user, "User created successfully");
+            return Ok(user, "Usuario criado com sucesso");
         })
         .AddEndpointFilter<ValidatorFilter<CreateUserRequest>>();
 
-        app.MapPost("/forgot-password", async (ForgotPasswordRequest request, UserManager<User> userManager) =>
+        app.MapPost("/forgot-password", async (ForgotPasswordRequest request, UserManager<User> userManager, IEmailService emailService) =>
         {
             var user = await userManager.FindByEmailAsync(request.Email);
             if (user == null) {
                 Log.ForContext("Email", request.Email)
                     .ForContext("Path", "forgot-password")
                     .Error("User tried to reset password but not found with email {Email}", request.Email);
-                return Ok("An email has been sent to your email address with a link to reset your password");
+                return Ok("Se este e-mail estiver cadastrado em nossa plataforma, você receberá um link para redefinir sua senha");
+            }
+
+            if (!user.EmailConfirmed) {
+                return BadRequest(["Email não confirmado. Tente pedir um novo e-mail de confirmação."], "Erro ao redefinir senha");
             }
 
             var resetCode = await userManager.GeneratePasswordResetTokenAsync(user);
 
-            //TODO: Implement email sending
-            return Ok(new { Email = user.Email, ResetCode = resetCode });
+            await emailService.SendEmailAsync(user.Email!, "Redefinição de senha", $"Reset code: {resetCode}");
+
+            return Ok("Se este e-mail estiver cadastrado em nossa plataforma, você receberá um link para redefinir sua senha");
         })
         .AddEndpointFilter<ValidatorFilter<ForgotPasswordRequest>>();
 
@@ -55,15 +61,15 @@ public class UserEndpoints : BaseEndpoint
         {
             var user = await userManager.FindByEmailAsync(request.Email);
             if (user == null) {
-                return BadRequest(new List<string> { "User not found" }, "Error reseting password");
+                return BadRequest(["Usuário não encontrado"], "Erro ao redefinir senha");
             }
 
             var result = await userManager.ResetPasswordAsync(user, request.ResetCode, request.NewPassword);
             if (!result.Succeeded) {
-                return BadRequest(result.Errors, "Error reseting password");
+                return BadRequest(result.Errors, "Erro ao redefinir senha");
             }
 
-            return Ok("Password reseted successfully");
+            return Ok("Senha redefinida com sucesso");
         })
         .AddEndpointFilter<ValidatorFilter<ResetPasswordRequest>>();
 
@@ -77,14 +83,14 @@ public class UserEndpoints : BaseEndpoint
 
             var result = await userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
 
-            if (!result.Succeeded) return BadRequest(result.Errors, "Error changing password");
+            if (!result.Succeeded) return BadRequest(result.Errors, "Erro ao alterar senha");
 
-            return Ok("Password changed successfully");
+            return Ok("Senha alterada com sucesso");
         })
         .AddEndpointFilter<ValidatorFilter<ChangePasswordRequest>>()
         .RequireAuthorization("AdminOrUser");
 
-        app.MapGet("/send-emailconfirmationtoken", async (UserManager<User> userManager, HttpContext httpContext) =>
+        app.MapGet("/send-emailconfirmationtoken", async (UserManager<User> userManager, HttpContext httpContext, IEmailService emailService) =>
         {
             var user = await GetUser(userManager, httpContext);
             if (user == null) {
@@ -92,13 +98,14 @@ public class UserEndpoints : BaseEndpoint
             }
 
             if (user.EmailConfirmed) {
-                return BadRequest(new List<string> { "Email already confirmed" }, "This user already has an email confirmed");
+                return BadRequest(["Este e-mail já foi confirmado pelo usuário"], "Email já confirmado");
             }
 
             var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
 
-            //TODO: Implement email sending
-            return Ok(new { Email = user.Email, ConfirmationToken = token });
+            await emailService.SendEmailAsync(user.Email!, "Confirme seu e-mail", $"Token: {token}");
+
+            return Ok("Um e-mail com o link de confirmação foi enviado para o seu e-mail");
         })
         .RequireAuthorization("AdminOrUser");
 
@@ -106,15 +113,15 @@ public class UserEndpoints : BaseEndpoint
         {
             var user = await userManager.FindByEmailAsync(request.Email);
             if (user == null) {
-                return BadRequest(new List<string> { "User not found" }, "Error confirming email");
+                return BadRequest(["Usuário não encontrado"], "Erro ao confirmar e-mail");
             }
 
             var result = await userManager.ConfirmEmailAsync(user, request.ConfirmationToken);
             if (!result.Succeeded) {
-                return BadRequest(result.Errors, "Error confirming email");
+                return BadRequest(result.Errors, "Erro ao confirmar e-mail");
             }
 
-            return Ok("Email confirmed successfully");
+            return Ok("E-mail confirmado com sucesso!");
         })
         .AddEndpointFilter<ValidatorFilter<ConfirmEmailRequest>>();
     }

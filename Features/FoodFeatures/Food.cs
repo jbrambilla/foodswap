@@ -26,12 +26,10 @@ public class Food : BaseModel
     public decimal Carbohydrates { get; private set; }
     public decimal Protein { get; private set; }
     public decimal Fat { get; private set; }
-
     public decimal CaloriesPerGram { get; private set; }
     public decimal CarbohydratesPerGram { get; private set; }
     public decimal ProteinPerGram { get; private set; }
     public decimal FatPerGram { get; private set; }
-
     public bool Active { get; private set; }
 
     public void Update(string name, int servingSize, EFoodCategory category, decimal calories, decimal carbohydrates, decimal protein, decimal fat)
@@ -59,18 +57,6 @@ public class Food : BaseModel
     {
         Active = true;
     }
-}
-
-public static class FoodCategories
-{
-    public const string VEGETABLE = "VEGETABLE";
-    public const string FRUIT = "FRUIT";
-    public const string MEAT = "MEAT";
-    public const string DAIRY = "DAIRY";
-    public const string GRAIN = "GRAIN";
-    public const string OTHER = "OTHER";
-
-    public static List<string> GetCategories() => new List<string> { VEGETABLE, FRUIT, MEAT, DAIRY, GRAIN, OTHER };
 }
 
 public enum EFoodCategory

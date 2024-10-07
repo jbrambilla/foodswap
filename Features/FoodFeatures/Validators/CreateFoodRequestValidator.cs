@@ -12,14 +12,12 @@ public class CreateFoodRequestValidator : AbstractValidator<CreateFoodRequest>
         RuleFor(x => x.Carbohydrates).GreaterThan(0);
         RuleFor(x => x.Protein).GreaterThan(0);
         RuleFor(x => x.Fat).GreaterThan(0);
-        RuleFor(x => x.Category)
-            .NotEmpty()
-            .Must(BeValidFoodType)
-            .WithMessage($"The type mu be one of the following: {string.Join(", ", FoodCategories.GetCategories())}.");
+        RuleFor(x => x.Category).Must(BeAValidEnumValue);
     }
 
-    private bool BeValidFoodType(string type)
+     private bool BeAValidEnumValue(EFoodCategory category)
     {
-        return FoodCategories.GetCategories().Contains(type);
+        // Converte para o enum e verifica se é válido
+        return Enum.IsDefined(typeof(EFoodCategory), category) && !category.Equals(default(EFoodCategory));
     }
 }

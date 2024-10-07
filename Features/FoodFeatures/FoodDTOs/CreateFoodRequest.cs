@@ -7,5 +7,5 @@ public class CreateFoodRequest
     public decimal Carbohydrates { get; set; }
     public decimal Protein { get; set; }
     public decimal Fat { get; set; }
-    public string Category { get; set; } = string.Empty;
+    public EFoodCategory Category { get; set; }
 }

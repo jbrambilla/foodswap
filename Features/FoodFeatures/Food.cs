@@ -3,7 +3,7 @@ using foodswap.Common.Models;
 namespace foodswap.Features.FoodFeatures;
 public class Food : BaseModel
 {
-    public Food(string name, int servingSize, decimal calories, decimal carbohydrates, decimal protein, decimal fat, string category)
+    public Food(string name, int servingSize, decimal calories, decimal carbohydrates, decimal protein, decimal fat, EFoodCategory category)
     {
         Name = name;
         ServingSize = servingSize;
@@ -21,7 +21,7 @@ public class Food : BaseModel
     }
     public string Name { get; private set; } = string.Empty;
     public int ServingSize { get; private set; }
-    public string Category { get; private set; }
+    public EFoodCategory Category { get; private set; }
     public decimal Calories { get; private set; }
     public decimal Carbohydrates { get; private set; }
     public decimal Protein { get; private set; }
@@ -34,7 +34,7 @@ public class Food : BaseModel
 
     public bool Active { get; private set; }
 
-    public void Update(string name, int servingSize, string category, decimal calories, decimal carbohydrates, decimal protein, decimal fat)
+    public void Update(string name, int servingSize, EFoodCategory category, decimal calories, decimal carbohydrates, decimal protein, decimal fat)
     {
         Name = name;
         ServingSize = servingSize;
@@ -71,4 +71,27 @@ public static class FoodCategories
     public const string OTHER = "OTHER";
 
     public static List<string> GetCategories() => new List<string> { VEGETABLE, FRUIT, MEAT, DAIRY, GRAIN, OTHER };
+}
+
+public enum EFoodCategory
+{
+    /// <summary>
+    /// TODOS ENUMS DEVEM POSSUIR O INVALID PADRAO = 0 PARA AS VALIDAÇÕES E CONVERSÕES FUNCIONAREM BEM
+    /// </summary>
+    INVALID_CATEGORY = 0,
+    VEGETABLES,
+    FRUITS,
+    MEATS,
+    DAIRY,
+    GRAIN,
+    FATS,
+    SEAFOODS,
+    DRINKS,
+    EGGS,
+    SUGARY,
+    INDUSTRIALIZED,
+    PREPARED,
+    LEGUMINOUS,
+    SEEDS,
+    OTHER
 }

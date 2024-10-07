@@ -2,9 +2,11 @@ using System.Text;
 using Carter;
 using FluentValidation;
 using foodswap.Common.Api;
+using foodswap.Common.Filters;
 using foodswap.Common.Options;
 using foodswap.Common.Services;
 using foodswap.Data.Identity;
+using foodswap.Features.FoodFeatures;
 using foodswap.Features.FoodFeatures.FoodDTOs;
 using foodswap.Features.FoodFeatures.Validators;
 using foodswap.Features.TokenFeatures.TokenDTOs;
@@ -12,6 +14,7 @@ using foodswap.Features.TokenFeatures.Validators;
 using foodswap.Features.UserFeatures.UserDTOs;
 using foodswap.Features.UserFeatures.Validators;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
@@ -23,9 +26,17 @@ using Serilog.Events;
 
 namespace foodswap.Common.Extensions;
 public static class BuilderExtensions{
-    public static WebApplicationBuilder AddCarter(this WebApplicationBuilder builder)
+
+    public static WebApplicationBuilder AddArchtectures(this WebApplicationBuilder builder)
     {
         builder.Services.AddCarter();
+
+        builder.Services.AddSingleton<TokenProvider>();
+
+        builder.Services.Configure<JsonOptions>(options =>
+        {
+            options.SerializerOptions.Converters.Add(new StringToEnumConverter<EFoodCategory>());
+        });
 
         return builder;
     }
@@ -104,6 +115,8 @@ public static class BuilderExtensions{
 
             o.SchemaFilter<ApiResponseSchemaFilter>();
 
+            o.SchemaFilter<EnumSchemaFilter>();
+
             o.SwaggerDoc("v1", new OpenApiInfo{ Title = "FoodSwap API", Version = "v1" });
         });
 
@@ -122,7 +135,6 @@ public static class BuilderExtensions{
 
         builder.Services.AddScoped<EmailService>();
 
-        builder.Services.AddSingleton<TokenProvider>();
         return builder;
     }
 

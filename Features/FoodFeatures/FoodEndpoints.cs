@@ -12,7 +12,7 @@ public class FoodEndpoints : BaseEndpoint
         :base("api/v1/foods")
     {
         WithTags("Foods");
-        RequireAuthorization("AdminOrUser");
+        //RequireAuthorization("AdminOrUser");
     }
     
     public override void AddRoutes(IEndpointRouteBuilder app)

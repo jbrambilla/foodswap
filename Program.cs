@@ -9,9 +9,9 @@ try {
     builder
         .AddLog()
         .AddOptions()
+        .AddArchtectures()
         .AddSwaggerWithAuth()
         .AddServices()
-        .AddCarter()
         .AddHttpLogging()
         .AddIdentity();
         

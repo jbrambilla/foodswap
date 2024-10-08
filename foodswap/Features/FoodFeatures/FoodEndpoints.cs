@@ -18,20 +18,42 @@ public class FoodEndpoints : BaseEndpoint
     
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet("/", (AppDbContext db) =>
+        app.MapGet("/", async ([AsParameters]GetAllFoodRequest request, AppDbContext db) =>
         {
+            var query = db.Foods
+                .AsNoTracking();
 
-            // var testeFood = new Food("Teste", 100, 100, 100, 100, 100, EFoodCategory.VEGETABLES);
+            if (!string.IsNullOrEmpty(request.Name))
+                query = query.Where(f => f.Name.Contains(request.Name));
 
-            // testeFood.Update("Teste", 100, EFoodCategory.VEGETABLES, 100, 100, 100, 100);
+            if (request.Sort is not null && request.Sort.ToLower() == "desc")
+                query = query.OrderByDescending(f => f.Name);
+            else query = query.OrderBy(f => f.Name);
 
-            var foods = db.Foods.AsNoTracking().ToList();
+            var take = (int)(request.PageSize is null ? 10 : request.PageSize);
+            var skip = (int)(request.Page is null ? 0 : (request.Page - 1) * take);
+
+            var foods = await query
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync();
+
+            var count = await query.CountAsync();
+
+            var response = new GetAllFoodResponse
+            {
+                Page = request.Page ?? 1,
+                PageSize = request.PageSize ?? 10,
+                Count = count,
+                Foods = foods.Adapt<List<FoodResumedResponse>>()
+
+            };
             return Ok(
-                foods.Adapt<List<FoodResumedResponse>>(), "Foods retrieved successfully");
+                response, "Foods retrieved successfully");
         })
-        .Produces<ApiResponse<List<FoodResumedResponse>>>(200)
-        .WithSummaryAndDescription("Retrieve all Foods", "Retrieve all Foods");
-        //.RequireAuthorization("AdminOrUser");
+        .Produces<ApiResponse<List<GetAllFoodResponse>>>(200)
+        .WithSummaryAndDescription("Retrieve all Foods", "Retrieve all Foods")
+        .RequireAuthorization("AdminOrUser");
 
         app.MapGet("/{id}", (Guid id, AppDbContext db) =>
         {

@@ -2,11 +2,11 @@ using FluentValidation;
 using foodswap.Features.FoodFeatures.FoodDTOs;
 
 namespace foodswap.Features.FoodFeatures.Validators;
-public class CreateFoodRequestValidator : AbstractValidator<CreateFoodRequest>
+public class CreateFoodRequestValidator : AbstractValidator<CreateOrUpdateFoodRequest>
 {
     public CreateFoodRequestValidator()
     {
-        RuleFor(x => x.Name).NotEmpty();
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
         RuleFor(x => x.ServingSize).GreaterThan(0);
         RuleFor(x => x.Calories).GreaterThan(0);
         RuleFor(x => x.Carbohydrates).GreaterThan(0);

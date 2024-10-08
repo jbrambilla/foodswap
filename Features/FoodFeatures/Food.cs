@@ -12,7 +12,7 @@ public class Food : BaseModel
         Carbohydrates = carbohydrates;
         Protein = protein;
         Fat = fat;
-        Active = true;
+        IsActive = true;
 
         CaloriesPerGram = calories / servingSize;
         CarbohydratesPerGram = carbohydrates / servingSize;
@@ -30,7 +30,7 @@ public class Food : BaseModel
     public decimal CarbohydratesPerGram { get; private set; }
     public decimal ProteinPerGram { get; private set; }
     public decimal FatPerGram { get; private set; }
-    public bool Active { get; private set; }
+    public bool IsActive { get; private set; }
 
     public void Update(string name, int servingSize, EFoodCategory category, decimal calories, decimal carbohydrates, decimal protein, decimal fat)
     {
@@ -50,12 +50,12 @@ public class Food : BaseModel
 
     public void Deactivate()
     {
-        Active = false;
+        IsActive = false;
     }
 
     public void Activate()
     {
-        Active = true;
+        IsActive = true;
     }
 }
 

@@ -5,6 +5,7 @@ using foodswap.Common.Api;
 using foodswap.Common.Filters;
 using foodswap.Common.Options;
 using foodswap.Common.Services;
+using foodswap.Data.Application;
 using foodswap.Data.Identity;
 using foodswap.Features.FoodFeatures;
 using foodswap.Features.FoodFeatures.FoodDTOs;
@@ -37,6 +38,9 @@ public static class BuilderExtensions{
         {
             options.SerializerOptions.Converters.Add(new StringToEnumConverter<EFoodCategory>());
         });
+
+        builder.Services.AddDbContext<AppDbContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
         return builder;
     }
@@ -125,7 +129,7 @@ public static class BuilderExtensions{
 
     public static WebApplicationBuilder AddServices(this WebApplicationBuilder builder)
     {
-        builder.Services.AddScoped<IValidator<CreateFoodRequest>, CreateFoodRequestValidator>();
+        builder.Services.AddScoped<IValidator<CreateOrUpdateFoodRequest>, CreateFoodRequestValidator>();
         builder.Services.AddScoped<IValidator<CreateUserRequest>, CreateUserRequestValidator>();
         builder.Services.AddScoped<IValidator<GetTokenRequest>, GetTokenRequestValidator>();
         builder.Services.AddScoped<IValidator<ChangePasswordRequest>, ChangePasswordRequestValidator>();

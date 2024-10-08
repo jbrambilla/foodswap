@@ -1,3 +1,4 @@
+using foodswap.Features;
 using foodswap.Features.FoodFeatures;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

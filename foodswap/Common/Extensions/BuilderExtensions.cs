@@ -7,9 +7,11 @@ using foodswap.Common.Options;
 using foodswap.Common.Services;
 using foodswap.Data.Application;
 using foodswap.Data.Identity;
-using foodswap.Features.FoodFeatures;
+using foodswap.Features;
 using foodswap.Features.FoodFeatures.FoodDTOs;
 using foodswap.Features.FoodFeatures.Validators;
+using foodswap.Features.SwapperFeatures.DTOs;
+using foodswap.Features.SwapperFeatures.Validators;
 using foodswap.Features.TokenFeatures.TokenDTOs;
 using foodswap.Features.TokenFeatures.Validators;
 using foodswap.Features.UserFeatures.UserDTOs;
@@ -130,12 +132,16 @@ public static class BuilderExtensions{
     public static WebApplicationBuilder AddServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddScoped<IValidator<CreateOrUpdateFoodRequest>, CreateFoodRequestValidator>();
-        builder.Services.AddScoped<IValidator<CreateUserRequest>, CreateUserRequestValidator>();
+        
         builder.Services.AddScoped<IValidator<GetTokenRequest>, GetTokenRequestValidator>();
+        builder.Services.AddScoped<IValidator<CreateUserRequest>, CreateUserRequestValidator>();
         builder.Services.AddScoped<IValidator<ChangePasswordRequest>, ChangePasswordRequestValidator>();
         builder.Services.AddScoped<IValidator<ForgotPasswordRequest>, ForgotPasswordRequestValidator>();
         builder.Services.AddScoped<IValidator<ConfirmEmailRequest>, ConfirmEmailRequestValidator>();
         builder.Services.AddScoped<IValidator<UserResetPasswordRequest>, UserResetPasswordRequestValidator>();
+
+        builder.Services.AddScoped<IValidator<CreateOrUpdateSwapperRequest>, CreateOrUpdateSwapperValidator>();
+        builder.Services.AddScoped<IValidator<CreateFoodSwapRequest>, CreateFoodSwapRequestValidator>();
 
         builder.Services.AddScoped<EmailService>();
 

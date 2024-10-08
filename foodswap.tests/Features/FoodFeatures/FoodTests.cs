@@ -1,3 +1,4 @@
+using foodswap.Features;
 using foodswap.Features.FoodFeatures;
 
 namespace foodswap.tests.Features.FoodFeatures;

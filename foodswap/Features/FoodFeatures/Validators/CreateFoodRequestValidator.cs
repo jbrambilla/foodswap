@@ -8,10 +8,10 @@ public class CreateFoodRequestValidator : AbstractValidator<CreateOrUpdateFoodRe
     {
         RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
         RuleFor(x => x.ServingSize).GreaterThan(0);
-        RuleFor(x => x.Calories).GreaterThan(0);
-        RuleFor(x => x.Carbohydrates).GreaterThan(0);
-        RuleFor(x => x.Protein).GreaterThan(0);
-        RuleFor(x => x.Fat).GreaterThan(0);
+        RuleFor(x => x.Calories).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.Carbohydrates).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.Protein).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.Fat).GreaterThanOrEqualTo(0);
         RuleFor(x => x.Category).Must(BeAValidEnumValue);
     }
 

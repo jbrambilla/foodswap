@@ -26,6 +26,10 @@ public class FoodEndpoints : BaseEndpoint
             if (!string.IsNullOrEmpty(request.Name))
                 query = query.Where(f => f.Name.Contains(request.Name));
 
+            var requestCategory = request.Category ?? string.Empty;
+            if (Enum.TryParse(requestCategory.ToUpper(), out EFoodCategory category))
+                query = query.Where(f => f.Category == category);
+
             if (request.Sort is not null && request.Sort.ToLower() == "desc")
                 query = query.OrderByDescending(f => f.Name);
             else query = query.OrderBy(f => f.Name);

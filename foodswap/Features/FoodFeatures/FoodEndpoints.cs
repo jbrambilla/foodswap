@@ -6,7 +6,6 @@ using foodswap.Data.Application;
 using foodswap.Features.FoodFeatures.FoodDTOs;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
-using SharpRaven.Data.Context;
 
 namespace foodswap.Features.FoodFeatures;
 public class FoodEndpoints : BaseEndpoint
@@ -21,13 +20,18 @@ public class FoodEndpoints : BaseEndpoint
     {
         app.MapGet("/", (AppDbContext db) =>
         {
+
+            // var testeFood = new Food("Teste", 100, 100, 100, 100, 100, EFoodCategory.VEGETABLES);
+
+            // testeFood.Update("Teste", 100, EFoodCategory.VEGETABLES, 100, 100, 100, 100);
+
             var foods = db.Foods.AsNoTracking().ToList();
             return Ok(
                 foods.Adapt<List<FoodResumedResponse>>(), "Foods retrieved successfully");
         })
         .Produces<ApiResponse<List<FoodResumedResponse>>>(200)
-        .WithSummaryAndDescription("Retrieve all Foods", "Retrieve all Foods")
-        .RequireAuthorization("AdminOrUser");
+        .WithSummaryAndDescription("Retrieve all Foods", "Retrieve all Foods");
+        //.RequireAuthorization("AdminOrUser");
 
         app.MapGet("/{id}", (Guid id, AppDbContext db) =>
         {

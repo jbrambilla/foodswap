@@ -19,6 +19,7 @@ public class Food : BaseModel
         ProteinPerGram = protein / servingSize;
         FatPerGram = fat / servingSize;
     }
+
     public string Name { get; private set; } = string.Empty;
     public int ServingSize { get; private set; }
     public EFoodCategory Category { get; private set; }

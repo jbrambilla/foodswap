@@ -1,6 +1,6 @@
-using foodswap.Common.Models;
 using foodswap.Data.Application.Configurations;
 using foodswap.Features.FoodFeatures;
+using foodswap.Features.SwapperFeatures.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace foodswap.Data.Application;
@@ -8,6 +8,8 @@ namespace foodswap.Data.Application;
 public class AppDbContext : DbContext
 {
     public DbSet<Food> Foods { get; set; }
+    public DbSet<Swapper> Swappers { get; set; }
+    public DbSet<FoodSwap> FoodSwaps { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) 
         : base(options)
@@ -17,6 +19,8 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfiguration(new FoodConfiguration());
+        builder.ApplyConfiguration(new SwapperConfiguration());
+        builder.ApplyConfiguration(new FoodSwapConfiguration());
 
         builder.HasDefaultSchema("app");
         base.OnModelCreating(builder);

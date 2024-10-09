@@ -1,21 +1,22 @@
-using foodswap.Features;
-using foodswap.Features.FoodFeatures;
+using foodswap.Features.SwapperFeatures.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace foodswap.Data.Application.Configurations;
 
-public class FoodConfiguration : IEntityTypeConfiguration<Food>
+public class FoodSwapConfiguration : IEntityTypeConfiguration<FoodSwap>
 {
-    public void Configure(EntityTypeBuilder<Food> builder)
+    public void Configure(EntityTypeBuilder<FoodSwap> builder)
     {
         builder
-            .ToTable("Foods")
+            .ToTable("FoodSwaps")
             .HasKey(f => f.Id);
 
         builder
-            .HasIndex(f => f.Name)
-            .IsUnique();
+            .HasOne(f => f.Swapper)
+            .WithMany(s => s.FoodSwaps)
+            .HasForeignKey(f => f.SwapperId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .Property(f => f.Name)
@@ -73,9 +74,9 @@ public class FoodConfiguration : IEntityTypeConfiguration<Food>
             .HasColumnType("decimal(6, 2)");
 
         builder
-            .Property(f => f.IsActive)
+            .Property(f => f.IsMain)
             .IsRequired()
-            .HasDefaultValue(true);
+            .HasDefaultValue(false);
 
         builder
             .Property(f => f.CreatedAt)

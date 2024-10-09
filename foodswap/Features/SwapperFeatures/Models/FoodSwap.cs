@@ -38,7 +38,7 @@ public class FoodSwap : BaseModel
 
     //EF RELATION
     public Guid SwapperId { get; private set; }
-    public Swapper Swapper { get; private set; } = null!;
+    public Swapper? Swapper { get; private set; }
 
     public void DefineAsMain()
     {

@@ -4,36 +4,34 @@ namespace foodswap.Features.SwapperFeatures.Models;
 
 public class FoodSwap : BaseModel
 {
-    public FoodSwap(Guid swapperId,string name, EFoodCategory category, int servingSize, decimal caloriesPerGram, decimal carbohydratesPerGram, decimal proteinPerGram, decimal fatPerGram)
+    public FoodSwap(Guid swapperId, string name, EFoodCategory category, int servingSize, decimal calories, decimal carbohydrates, decimal protein, decimal fat)
     {
         SwapperId = swapperId;
         Name = name;
         Category = category;
         ServingSize = servingSize;
-        CaloriesPerGram = caloriesPerGram;
-        CarbohydratesPerGram = carbohydratesPerGram;
-        ProteinPerGram = proteinPerGram;
-        FatPerGram = fatPerGram;
+        Calories = calories;
+        Carbohydrates = carbohydrates;
+        Protein = protein;
+        Fat = fat;
         IsMain = false;
 
-        Calories = caloriesPerGram * servingSize;
-        Carbohydrates = carbohydratesPerGram * servingSize;
-        Protein = proteinPerGram * servingSize;
-        Fat = fatPerGram * servingSize;
+        CaloriesPerGram = calories / servingSize;
+        CarbohydratesPerGram = carbohydrates / servingSize;
+        ProteinPerGram = protein / servingSize;
+        FatPerGram = fat / servingSize;
     }
     public string Name { get; private set; } = string.Empty;
     public EFoodCategory Category { get; private set; }
     public int ServingSize { get; private set; }
-    public decimal CaloriesPerGram { get; private set; }
-    public decimal CarbohydratesPerGram { get; private set; }
-    public decimal ProteinPerGram { get; private set; }
-    public decimal FatPerGram { get; private set; }
-
     public decimal Calories { get; private set; }
     public decimal Carbohydrates { get; private set; }
     public decimal Protein { get; private set; }
     public decimal Fat { get; private set; }
-
+    public decimal CaloriesPerGram { get; private set; }
+    public decimal CarbohydratesPerGram { get; private set; }
+    public decimal ProteinPerGram { get; private set; }
+    public decimal FatPerGram { get; private set; }
     public bool IsMain { get; private set; }
 
     //EF RELATION

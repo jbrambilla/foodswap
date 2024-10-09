@@ -9,20 +9,21 @@ public class FoodSwapTests
     public void New_Should_Set_Macros_And_NotBeMain()
     {
         //Arrange
+        int servingSizeToUpdate = 200;
         int servingSize = 100;
-        var caloriesPerGram = 0.9M;
-        var carbohydratesPerGram = 0.22M;
-        var proteinPerGram = 0.09M;
-        var fatPerGram = 0.03M;
+        var calories = 90M;
+        var carbohydrates = 22M;
+        var protein = 9M;
+        var fat = 3M;
 
         //Act
-        var foodSwap = new FoodSwap(new Guid(), "Banana", EFoodCategory.FRUITS, servingSize, caloriesPerGram, carbohydratesPerGram, proteinPerGram, fatPerGram);
-
+        var foodSwap = new FoodSwap(new Guid(), "Banana", EFoodCategory.FRUITS, servingSize, calories, carbohydrates, protein, fat);
+ 
         //Assert
-        Assert.Equal(caloriesPerGram * servingSize, foodSwap.Calories);
-        Assert.Equal(carbohydratesPerGram * servingSize, foodSwap.Carbohydrates);
-        Assert.Equal(proteinPerGram * servingSize, foodSwap.Protein);
-        Assert.Equal(fatPerGram * servingSize, foodSwap.Fat);
+        Assert.Equal(calories / servingSize, foodSwap.CaloriesPerGram);
+        Assert.Equal(carbohydrates / servingSize, foodSwap.CarbohydratesPerGram);
+        Assert.Equal(protein / servingSize, foodSwap.ProteinPerGram);
+        Assert.Equal(fat / servingSize, foodSwap.FatPerGram);
         Assert.False(foodSwap.IsMain);
     }
 
@@ -32,20 +33,20 @@ public class FoodSwapTests
         //Arrange
         int servingSizeToUpdate = 200;
         int servingSize = 100;
-        var caloriesPerGram = 0.9M;
-        var carbohydratesPerGram = 0.22M;
-        var proteinPerGram = 0.09M;
-        var fatPerGram = 0.03M;
-        var foodSwap = new FoodSwap(new Guid(), "Banana", EFoodCategory.FRUITS, servingSize, caloriesPerGram, carbohydratesPerGram, proteinPerGram, fatPerGram);
+        var calories = 90M;
+        var carbohydrates = 22M;
+        var protein = 9M;
+        var fat = 3M;
+        var foodSwap = new FoodSwap(new Guid(), "Banana", EFoodCategory.FRUITS, servingSize, calories, carbohydrates, protein, fat);
 
         //Act
         foodSwap.UpdateServingSize(servingSizeToUpdate);
 
         //Assert
-        Assert.Equal(caloriesPerGram * servingSizeToUpdate, foodSwap.Calories);
-        Assert.Equal(carbohydratesPerGram * servingSizeToUpdate, foodSwap.Carbohydrates);
-        Assert.Equal(proteinPerGram * servingSizeToUpdate, foodSwap.Protein);
-        Assert.Equal(fatPerGram * servingSizeToUpdate, foodSwap.Fat);
+        Assert.Equal(foodSwap.CaloriesPerGram * servingSizeToUpdate, foodSwap.Calories);
+        Assert.Equal(foodSwap.CarbohydratesPerGram * servingSizeToUpdate, foodSwap.Carbohydrates);
+        Assert.Equal(foodSwap.ProteinPerGram * servingSizeToUpdate, foodSwap.Protein);
+        Assert.Equal(foodSwap.FatPerGram * servingSizeToUpdate, foodSwap.Fat);
     }
 
 }

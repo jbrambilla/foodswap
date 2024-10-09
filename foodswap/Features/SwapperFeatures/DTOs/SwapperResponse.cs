@@ -1,6 +1,6 @@
 namespace foodswap.Features.SwapperFeatures.DTOs;
 
-public class CreateOrUpdateSwapperResponse
+public class SwapperResponse
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;

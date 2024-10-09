@@ -1,8 +1,13 @@
 using foodswap.Common.Api;
 using foodswap.Common.Extensions;
 using foodswap.Common.Filters;
+using foodswap.Data.Application;
+using foodswap.Data.Identity;
 using foodswap.Features.SwapperFeatures.DTOs;
 using foodswap.tests.Features.SwapperFeatures.Models;
+using Mapster;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace foodswap.Features.SwapperFeatures;
 
@@ -16,10 +21,20 @@ public class SwapperEndpoints : BaseEndpoint
 
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet("/", () =>
+        app.MapGet("/", async (UserManager<User> userManager, HttpContext httpContext, AppDbContext db) =>
         {
-            return Results.Ok();
-        });
+            var user = await userManager.GetUserAsync(httpContext.User);
+
+            if (user is null) {
+                Results.Unauthorized();
+            }
+
+            var swappers = await db.Swappers.AsNoTracking().ToListAsync();
+            return Ok(swappers.Adapt<List<SwapperResponse>>(), "Swappers retrieved successfully");
+        })
+        .Produces<ApiResponse<List<SwapperResponse>>>(200)
+        .WithSummaryAndDescription("Retrieve all Swappers", "Retrieve all Swappers from the authenticated User")
+        .RequireAuthorization("AdminOrUser");
 
         app.MapGet("/{id}", (Guid id) =>
         {
@@ -37,7 +52,7 @@ public class SwapperEndpoints : BaseEndpoint
         .AddEndpointFilter<ValidatorFilter<CreateOrUpdateSwapperRequest>>()
         .WithSummaryAndDescription("Create a new Swapper", "Create a new Swapper in the database")
         .Accepts<CreateOrUpdateSwapperRequest>("application/json")
-        .Produces<ApiResponse<CreateOrUpdateSwapperResponse>>(200)
+        .Produces<ApiResponse<SwapperResponse>>(200)
         .Produces<ApiResponse<object>>(400);
 
         app.MapPut("/{id}", (Guid id, CreateOrUpdateSwapperRequest request) =>
@@ -47,7 +62,7 @@ public class SwapperEndpoints : BaseEndpoint
         .AddEndpointFilter<ValidatorFilter<CreateOrUpdateSwapperRequest>>()
         .WithSummaryAndDescription("Update Swapper", "Update Swapper in the database")
         .Accepts<CreateOrUpdateSwapperRequest>("application/json")
-        .Produces<ApiResponse<CreateOrUpdateSwapperResponse>>(200)
+        .Produces<ApiResponse<SwapperResponse>>(200)
         .Produces<ApiResponse<object>>(400);
 
         app.MapDelete("/{id}", (Guid id) =>

@@ -2,6 +2,7 @@ using foodswap.Common.Api;
 using foodswap.Common.Extensions;
 using foodswap.Common.Filters;
 using foodswap.Features.SwapperFeatures.DTOs;
+using foodswap.tests.Features.SwapperFeatures.Models;
 
 namespace foodswap.Features.SwapperFeatures;
 
@@ -71,6 +72,15 @@ public class SwapperEndpoints : BaseEndpoint
             return Results.Ok();
         })
         .Produces(204)
+        .Produces<ApiResponse<object>>(400);
+
+        app.MapPatch("/{swapperId}/foodswaps/{foodswapId}/update-servingSize", (Guid swapperId, Guid foodswapId, UpdateFoodSwapServingSizeRequest request) =>
+        {
+            return Results.Ok(request);
+        })
+        .AddEndpointFilter<ValidatorFilter<UpdateFoodSwapServingSizeRequest>>()
+        .Accepts<UpdateFoodSwapServingSizeRequest>("application/json")
+        .Produces<ApiResponse<FoodSwapResponse>>(200)
         .Produces<ApiResponse<object>>(400);
 
         app.MapDelete("/{swapperId}/foodswaps/{foodswapId}", (Guid swapperId, Guid foodswapId) =>

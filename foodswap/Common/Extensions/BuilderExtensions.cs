@@ -16,6 +16,8 @@ using foodswap.Features.TokenFeatures.TokenDTOs;
 using foodswap.Features.TokenFeatures.Validators;
 using foodswap.Features.UserFeatures.UserDTOs;
 using foodswap.Features.UserFeatures.Validators;
+using foodswap.tests.Features.SwapperFeatures.Models;
+using foodswap.tests.Features.SwapperFeatures.Validators;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.HttpLogging;
@@ -142,6 +144,7 @@ public static class BuilderExtensions{
 
         builder.Services.AddScoped<IValidator<CreateOrUpdateSwapperRequest>, CreateOrUpdateSwapperValidator>();
         builder.Services.AddScoped<IValidator<CreateFoodSwapRequest>, CreateFoodSwapRequestValidator>();
+        builder.Services.AddScoped<IValidator<UpdateFoodSwapServingSizeRequest>, UpdateFoodSwapServingSizeRequestValidator>();
 
         builder.Services.AddScoped<EmailService>();
 

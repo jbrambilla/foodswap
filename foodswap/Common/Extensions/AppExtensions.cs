@@ -38,16 +38,17 @@ public static class AppExtensions
                 
                 context.Response.StatusCode = 500;
                 var errorMessage = "An unexpected error has occurred in the server. Please, contact support.";
-
+                var errorList = new List<string>();
                 if (ex.InnerException is JsonException jsonEx)
                 {
                     context.Response.StatusCode = 400;  // Retorna BadRequest
                     context.Response.ContentType = "application/json";
 
                     errorMessage = "Invalid input format. Please check the data types of your request.";
+                    errorList.Add($"invalid format in field: {jsonEx.Path}");
                 }             
 
-                await context.Response.WriteAsJsonAsync(new ApiResponse<object>(false, errorMessage, null!, [])); //não expor exception pro usuario
+                await context.Response.WriteAsJsonAsync(new ApiResponse<object>(false, errorMessage, null!, errorList)); //não expor exception pro usuario
             }
         });
 

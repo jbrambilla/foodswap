@@ -31,11 +31,18 @@ public class TokenEndpoints : BaseEndpoint
 
             var roles = await userManager.GetRolesAsync(user);
 
-            var token = tokenProvider.Create(user, roles.ToArray());
+            var tokenProviderResponse = tokenProvider.Create(user, roles.ToArray());
             
-            return Ok(new TokenResponse{ Token = token, ExpiresAt = DateTime.Now.AddMinutes(60) }, "Token created successfully");
+            return Ok(new TokenResponse{ Token = tokenProviderResponse.Token, ExpiresAt = ConvertToUserTimeZone(tokenProviderResponse.ExpiresAt) }, "Token created successfully");
         })
         .AddEndpointFilter<ValidatorFilter<GetTokenRequest>>();
     }
+
+    private DateTime ConvertToUserTimeZone(DateTime utcDateTime)
+    {
+        var userTimeZone = TimeZoneInfo.FindSystemTimeZoneById("America/Sao_Paulo");
+        return TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, userTimeZone);
+    }
 }
+
 

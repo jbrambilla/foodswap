@@ -19,7 +19,7 @@ public class SwapperEndpoints : BaseEndpoint
         :base("api/v1/swappers")
     {
         WithTags("Swappers");
-        RequireAuthorization("AdminOrUser");
+        //RequireAuthorization("AdminOrUser");
     }
 
     public override void AddRoutes(IEndpointRouteBuilder app)
@@ -240,5 +240,82 @@ public class SwapperEndpoints : BaseEndpoint
         })
         .Produces(204)
         .Produces<ApiResponse<object>>(400);
+
+        app.MapGet("/{swapperId}/foodswaps/{foodswapId}/suggestions", async (Guid swapperId, Guid foodswapId, ClaimsPrincipal user, AppDbContext db, [AsParameters]GetSuggestionsRequest request) =>
+        {
+            var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId is null) {
+                return Results.Unauthorized();
+            }
+
+            if (!db.Swappers.AsNoTracking().Any(s => s.Id == swapperId && s.UserId == userId)) {
+                return BadRequest(["Swapper does not exist or does not belong to the authenticated User"], "Swapper does not exist in the database");
+            }
+
+            var foodSwap = db.FoodSwaps.FirstOrDefault(fs => fs.SwapperId == swapperId && fs.Id == foodswapId);
+            if (foodSwap is null) {
+                return BadRequest(["FoodSwap does not exist or does not belong to the authenticated Swapper"], "FoodSwap does not exist in the database");
+            }
+
+            if (!foodSwap.IsMain) return BadRequest(["FoodSwap is not main"], "FoodSwap is not main");
+
+            var take = (int)(request.PageSize is null ? 10 : request.PageSize);
+            var skip = (int)(request.Page is null ? 0 : (request.Page - 1) * take);
+
+            var errorMargin = 20M;
+
+            var minPortion = foodSwap.ServingSize - (foodSwap.ServingSize * 0.5M);
+            var maxPortion = foodSwap.ServingSize + (foodSwap.ServingSize * 0.5M);
+
+            var query = db.Foods
+                .AsNoTracking()
+                .Where(f => f.Name != foodSwap.Name)
+                .Where(f =>
+                    Enumerable.Range((int)minPortion, (int)(maxPortion - minPortion + 1))
+                    .Any(comparedPortion =>
+                        Math.Abs(foodSwap.Calories - f.CaloriesPerGram * comparedPortion) <= errorMargin
+                        && Math.Abs(foodSwap.Carbohydrates - f.CarbohydratesPerGram * comparedPortion) <= errorMargin
+                        && Math.Abs(foodSwap.Protein - f.ProteinPerGram * comparedPortion) <= errorMargin
+                        && Math.Abs(foodSwap.Fat - f.FatPerGram * comparedPortion) <= errorMargin
+                        //&& RelatedCategories.GetRelatedCategories(foodSwap.Category).Contains(f.Category)
+                    )
+            );
+
+            var foods = await query
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync();
+
+            var count = await query.CountAsync();
+
+            return Ok(new GetSuggestionResponse{ 
+                Page = request.Page ?? 1,
+                PageSize = request.PageSize ?? 10,
+                Count = count,
+                Foods = foods.Adapt<List<FoodSuggestionResponse>>()
+            });
+        })
+        .Produces<ApiResponse<List<GetSuggestionResponse>>>(200)
+        .Produces<ApiResponse<object>>(400)
+        .WithSummaryAndDescription("Retrieve Foods as suggestions for the selected food", "The suggestion is made based on macros and related categories");
+    }
+}
+
+public static class RelatedCategories
+{
+    public static List<EFoodCategory> GetRelatedCategories(EFoodCategory category)
+    {
+        var relatedCategories = new Dictionary<int, List<EFoodCategory>>()
+        {
+            { 1, new List<EFoodCategory> { EFoodCategory.GRAIN, EFoodCategory.VEGETABLES, EFoodCategory.SUGARY } },
+            { 2, new List<EFoodCategory> { EFoodCategory.MEATS, EFoodCategory.SEAFOODS, EFoodCategory.LEGUMINOUS } },
+            { 3, new List<EFoodCategory> { EFoodCategory.DAIRY, EFoodCategory.DAIRY, EFoodCategory.SEEDS } }
+        };
+
+        return relatedCategories
+            .Where(r => r.Value.Contains(category))
+            .SelectMany(r => r.Value)
+            .Distinct()
+            .ToList();
     }
 }

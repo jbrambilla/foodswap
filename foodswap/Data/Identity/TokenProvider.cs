@@ -8,7 +8,7 @@ using Serilog;
 namespace foodswap.Data.Identity;
 public sealed class TokenProvider(IConfiguration configuration)
 {
-    public string Create(User user, string[] roles)
+    public TokenProviderResponse Create(User user, string[] roles)
     {
         var jwtOptions = configuration
             .GetSection(JwtOptions.SectionName)
@@ -40,6 +40,13 @@ public sealed class TokenProvider(IConfiguration configuration)
 
         var handler = new JsonWebTokenHandler();
         var token = handler.CreateToken(tokenDescriptor);
-        return token;
+
+        return new TokenProviderResponse{ Token = token, ExpiresAt = DateTime.UtcNow.AddMinutes(handler.TokenLifetimeInMinutes) };
     }
+}
+
+public class TokenProviderResponse
+{
+    public string Token { get; set; } = string.Empty;
+    public DateTime ExpiresAt { get; set; }
 }

@@ -298,6 +298,48 @@ public class SwapperEndpoints : BaseEndpoint
         .Produces<ApiResponse<List<GetSuggestionResponse>>>(200)
         .Produces<ApiResponse<object>>(400)
         .WithSummaryAndDescription("Retrieve Foods as suggestions for the selected food", "The suggestion is made based on macros and related categories");
+
+        app.MapGet("v2/{foodswapId}", async (Guid foodswapId, AppDbContext db, [AsParameters]GetSuggestionsRequest request) =>
+        {
+
+            var foodSwap = db.FoodSwaps
+                .AsNoTracking()
+                .FirstOrDefault(fs => fs.Id == foodswapId);
+            if (foodSwap is null) {
+                return BadRequest(["FoodSwap does not exist or does not belong to the authenticated Swapper"], "FoodSwap does not exist in the database");
+            }
+
+            var take = (int)(request.PageSize is null ? 10 : request.PageSize);
+            var skip = (int)(request.Page is null ? 0 : (request.Page - 1) * take);
+
+            var query = db.Foods
+                .AsNoTracking()
+                .Where(f => f.Name != foodSwap.Name);
+
+            if (foodSwap.Category is EFoodCategory.GRAIN or EFoodCategory.VEGETABLES or EFoodCategory.SUGARY)
+                query = query.OrderByDescending(f => f.Carbohydrates/f.Calories);
+            if (foodSwap.Category is EFoodCategory.MEATS or EFoodCategory.SEAFOODS or EFoodCategory.LEGUMINOUS)
+                query = query.OrderByDescending(f => f.Protein/f.Calories);
+            if (foodSwap.Category is EFoodCategory.DAIRY or EFoodCategory.FATS or EFoodCategory.SEEDS)
+                query = query.OrderByDescending(f => f.Fat/f.Calories);
+
+            var foods = await query
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync();
+
+            var count = await query.CountAsync();
+
+            return Ok(new GetSuggestionResponse{ 
+                Page = request.Page ?? 1,
+                PageSize = request.PageSize ?? 10,
+                Count = count,
+                Foods = foods.Adapt<List<FoodSuggestionResponse>>()
+            });
+        })
+        .Produces<ApiResponse<List<GetSuggestionResponse>>>(200)
+        .Produces<ApiResponse<object>>(400)
+        .WithSummaryAndDescription("Retrieve Foods as suggestions for the selected food", "The suggestion is made based on macros and related categories");
     }
 }
 
@@ -309,7 +351,7 @@ public static class RelatedCategories
         {
             { 1, new List<EFoodCategory> { EFoodCategory.GRAIN, EFoodCategory.VEGETABLES, EFoodCategory.SUGARY } },
             { 2, new List<EFoodCategory> { EFoodCategory.MEATS, EFoodCategory.SEAFOODS, EFoodCategory.LEGUMINOUS } },
-            { 3, new List<EFoodCategory> { EFoodCategory.DAIRY, EFoodCategory.DAIRY, EFoodCategory.SEEDS } }
+            { 3, new List<EFoodCategory> { EFoodCategory.DAIRY, EFoodCategory.FATS, EFoodCategory.SEEDS } }
         };
 
         return relatedCategories

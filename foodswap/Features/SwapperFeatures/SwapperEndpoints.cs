@@ -262,56 +262,6 @@ public class SwapperEndpoints : BaseEndpoint
             var take = (int)(request.PageSize is null ? 10 : request.PageSize);
             var skip = (int)(request.Page is null ? 0 : (request.Page - 1) * take);
 
-            var errorMargin = 20M;
-
-            var minPortion = foodSwap.ServingSize - (foodSwap.ServingSize * 0.5M);
-            var maxPortion = foodSwap.ServingSize + (foodSwap.ServingSize * 0.5M);
-
-            var query = db.Foods
-                .AsNoTracking()
-                .Where(f => f.Name != foodSwap.Name)
-                .Where(f =>
-                    Enumerable.Range((int)minPortion, (int)(maxPortion - minPortion + 1))
-                    .Any(comparedPortion =>
-                        Math.Abs(foodSwap.Calories - f.CaloriesPerGram * comparedPortion) <= errorMargin
-                        && Math.Abs(foodSwap.Carbohydrates - f.CarbohydratesPerGram * comparedPortion) <= errorMargin
-                        && Math.Abs(foodSwap.Protein - f.ProteinPerGram * comparedPortion) <= errorMargin
-                        && Math.Abs(foodSwap.Fat - f.FatPerGram * comparedPortion) <= errorMargin
-                        //&& RelatedCategories.GetRelatedCategories(foodSwap.Category).Contains(f.Category)
-                    )
-            );
-
-            var foods = await query
-                .Skip(skip)
-                .Take(take)
-                .ToListAsync();
-
-            var count = await query.CountAsync();
-
-            return Ok(new GetSuggestionResponse{ 
-                Page = request.Page ?? 1,
-                PageSize = request.PageSize ?? 10,
-                Count = count,
-                Foods = foods.Adapt<List<FoodSuggestionResponse>>()
-            });
-        })
-        .Produces<ApiResponse<List<GetSuggestionResponse>>>(200)
-        .Produces<ApiResponse<object>>(400)
-        .WithSummaryAndDescription("Retrieve Foods as suggestions for the selected food", "The suggestion is made based on macros and related categories");
-
-        app.MapGet("v2/{foodswapId}", async (Guid foodswapId, AppDbContext db, [AsParameters]GetSuggestionsRequest request) =>
-        {
-
-            var foodSwap = db.FoodSwaps
-                .AsNoTracking()
-                .FirstOrDefault(fs => fs.Id == foodswapId);
-            if (foodSwap is null) {
-                return BadRequest(["FoodSwap does not exist or does not belong to the authenticated Swapper"], "FoodSwap does not exist in the database");
-            }
-
-            var take = (int)(request.PageSize is null ? 10 : request.PageSize);
-            var skip = (int)(request.Page is null ? 0 : (request.Page - 1) * take);
-
             var query = db.Foods
                 .AsNoTracking()
                 .Where(f => f.Name != foodSwap.Name);
@@ -340,24 +290,5 @@ public class SwapperEndpoints : BaseEndpoint
         .Produces<ApiResponse<List<GetSuggestionResponse>>>(200)
         .Produces<ApiResponse<object>>(400)
         .WithSummaryAndDescription("Retrieve Foods as suggestions for the selected food", "The suggestion is made based on macros and related categories");
-    }
-}
-
-public static class RelatedCategories
-{
-    public static List<EFoodCategory> GetRelatedCategories(EFoodCategory category)
-    {
-        var relatedCategories = new Dictionary<int, List<EFoodCategory>>()
-        {
-            { 1, new List<EFoodCategory> { EFoodCategory.GRAIN, EFoodCategory.VEGETABLES, EFoodCategory.SUGARY } },
-            { 2, new List<EFoodCategory> { EFoodCategory.MEATS, EFoodCategory.SEAFOODS, EFoodCategory.LEGUMINOUS } },
-            { 3, new List<EFoodCategory> { EFoodCategory.DAIRY, EFoodCategory.FATS, EFoodCategory.SEEDS } }
-        };
-
-        return relatedCategories
-            .Where(r => r.Value.Contains(category))
-            .SelectMany(r => r.Value)
-            .Distinct()
-            .ToList();
     }
 }
